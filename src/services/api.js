@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });
@@ -21,7 +21,7 @@ api.interceptors.response.use(
     ) {
       original._retry = true;
       try {
-        await axios.post('/api/auth/refresh', {}, { withCredentials: true });
+        await axios.post(`${import.meta.env.VITE_API_URL || '/api'}/auth/refresh`, {}, { withCredentials: true });
         return api(original);
       } catch {
         // Refresh failed — clear everything and redirect to appropriate login
