@@ -92,7 +92,7 @@ function InquiryModal({ business, onClose }) {
           <X size={16} />
         </button>
 
-        <div style={{ padding: '36px 32px 32px' }}>
+        <div className="user-inquiry-modal" style={{ padding: '36px 32px 32px' }}>
           {sent ? (
             <div style={{ textAlign: 'center', padding: '40px 0' }}>
               <div
@@ -169,7 +169,7 @@ function InquiryModal({ business, onClose }) {
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#1d1d1f', marginBottom: 10 }}>
                   Quick select
                 </label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+                <div className="user-inquiry-pills" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
                   {[
                     "I'd like to request detailed financials and revenue history.",
                     "I'm interested in understanding the day-to-day operations and transition support.",
@@ -306,7 +306,7 @@ export default function ListingPage() {
   if (!business) {
     return (
       <Layout>
-        <div style={{ padding: '120px 40px', textAlign: 'center' }}>
+        <div style={{ padding: '120px clamp(16px, 5vw, 40px)', textAlign: 'center' }}>
           <div style={{ marginBottom: 16, opacity: 0.3 }}><Search size={48} /></div>
           <h2 style={{ fontSize: 28, fontWeight: 600, color: '#1d1d1f', marginBottom: 8 }}>
             Listing not found
@@ -365,21 +365,22 @@ export default function ListingPage() {
       >
         <div
           style={{
-            padding: '0 40px',
+            padding: '0 clamp(16px, 5vw, 40px)',
             height: 48,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            gap: 12,
           }}
         >
           <span
             onClick={() => navigate(-1)}
-            style={{ fontSize: 13, color: '#0066cc', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 2 }}
+            style={{ fontSize: 13, color: '#0066cc', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 2, flexShrink: 0, whiteSpace: 'nowrap' }}
           >
-            <ChevronLeft size={14} /> Back to results
+            <ChevronLeft size={14} /> Back
           </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>{business.name}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1, justifyContent: 'flex-end' }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{business.name}</span>
             <button
               onClick={() => setShowInquiry(true)}
               style={{
@@ -388,9 +389,11 @@ export default function ListingPage() {
                 color: '#fff',
                 fontSize: 13,
                 fontWeight: 500,
-                padding: '7px 18px',
+                padding: '7px 14px',
                 borderRadius: 980,
                 cursor: 'pointer',
+                flexShrink: 0,
+                whiteSpace: 'nowrap',
               }}
             >
               Request info
@@ -400,7 +403,7 @@ export default function ListingPage() {
       </div>
 
       {/* Hero */}
-      <section style={{ padding: '56px 40px 0', textAlign: 'center' }}>
+      <section style={{ padding: '56px clamp(16px, 5vw, 40px) 0', textAlign: 'center' }}>
         <div
           style={{
             fontSize: 11,
@@ -427,6 +430,7 @@ export default function ListingPage() {
           {business.name}
         </h1>
         <p
+          className="user-listing-hero-desc"
           style={{
             fontSize: 'clamp(19px, 2.4vw, 26px)',
             color: '#6e6e73',
@@ -442,6 +446,7 @@ export default function ListingPage() {
           {business.description || 'Premium business opportunity'}
         </p>
         <div
+          className="user-listing-hero-price"
           style={{
             fontSize: 15,
             color: '#1d1d1f',
@@ -451,7 +456,7 @@ export default function ListingPage() {
           Asking {formatPrice(business.askingPrice)} ·{' '}
           {[business.city, business.country?.name].filter(Boolean).join(', ')}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 14, marginBottom: 40 }}>
+        <div className="user-listing-hero-actions" style={{ display: 'flex', justifyContent: 'center', gap: 14, marginBottom: 40 }}>
           <button
             onClick={() => setShowInquiry(true)}
             style={{
@@ -506,8 +511,9 @@ export default function ListingPage() {
       </section>
 
       {/* Stats Band */}
-      <section style={{ padding: '40px 40px 0' }}>
+      <section style={{ padding: '40px clamp(16px, 5vw, 40px) 0' }}>
         <div
+          className="user-stats-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
@@ -543,7 +549,7 @@ export default function ListingPage() {
 
       {/* Description */}
       {business.description && (
-        <section style={{ padding: '48px 40px 0', maxWidth: 800, margin: '0 auto' }}>
+        <section style={{ padding: '48px clamp(16px, 5vw, 40px) 0', maxWidth: 800, margin: '0 auto' }}>
           <h2
             style={{
               fontSize: 28,
@@ -563,7 +569,7 @@ export default function ListingPage() {
 
       {/* Gallery */}
       {business.images && business.images.length > 1 && (
-        <section style={{ padding: '48px 40px 0' }}>
+        <section style={{ padding: '48px clamp(16px, 5vw, 40px) 0' }}>
           <h2
             style={{
               fontSize: 28,
@@ -575,7 +581,7 @@ export default function ListingPage() {
           >
             Gallery
           </h2>
-          <div style={{ display: 'flex', gap: 12 }}>
+          <div className="user-gallery-grid" style={{ display: 'flex', gap: 12 }}>
             <div style={{ flex: 1.6 }}>
               <img
                 src={business.images[0]}
@@ -611,13 +617,14 @@ export default function ListingPage() {
       )}
 
       {/* CTA Band */}
-      <section style={{ padding: '48px 40px 0' }}>
+      <section style={{ padding: '48px clamp(16px, 5vw, 40px) 0' }}>
         <div
+          className="user-cta-band"
           style={{
             borderRadius: 22,
             background: 'linear-gradient(160deg, #1d2330, #10141d)',
             color: '#fff',
-            padding: '40px 40px',
+            padding: '40px clamp(16px, 5vw, 40px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -652,7 +659,7 @@ export default function ListingPage() {
       {/* Similar Listings */}
       {similar.length > 0 && (
         <section style={{ padding: '48px 0 0' }}>
-          <div style={{ padding: '0 40px' }}>
+          <div style={{ padding: '0 clamp(16px, 5vw, 40px)' }}>
             <h2
               style={{
                 fontSize: 'clamp(22px, 2.6vw, 28px)',
@@ -666,13 +673,13 @@ export default function ListingPage() {
             </h2>
           </div>
           <div
-            className="mq-row"
+            className="mq-row user-similar-scroll"
             style={{
               display: 'flex',
               gap: 20,
               overflowX: 'auto',
               padding: '4px 0 22px',
-              margin: '0 40px',
+              margin: '0 clamp(16px, 5vw, 40px)',
             }}
           >
             {similar.map((l) => (

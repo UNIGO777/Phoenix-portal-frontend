@@ -115,6 +115,7 @@ export default function CountryList() {
             </p>
           </div>
           <button
+            className="admin-header-btn"
             onClick={openAdd}
             style={{
               padding: '10px 22px',
@@ -153,6 +154,7 @@ export default function CountryList() {
             initial="hidden"
             animate="visible"
             transition={{ duration: 0.4 }}
+            className="admin-form-card"
             style={{
               background: '#fff',
               borderRadius: 18,
@@ -172,7 +174,7 @@ export default function CountryList() {
             >
               {editingId ? 'Edit Country' : 'New Country'}
             </h3>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
+            <div className="admin-inline-form" style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
               <div style={{ flex: 1 }}>
                 <label
                   style={{

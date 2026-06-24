@@ -240,6 +240,7 @@ export default function BulkOperations() {
 
         {/* Section 1: Import Businesses */}
         <motion.div
+          className="admin-form-card"
           variants={fadeUp}
           transition={{ duration: 0.5, delay: 0.1 }}
           style={{ ...cardStyle, marginBottom: 24 }}
@@ -330,6 +331,7 @@ export default function BulkOperations() {
 
         {/* Section 2: Bulk Status Update */}
         <motion.div
+          className="admin-form-card"
           variants={fadeUp}
           transition={{ duration: 0.5, delay: 0.2 }}
           style={cardStyle}

@@ -49,10 +49,462 @@ input::placeholder {
   -ms-overflow-style: none;
 }
 
+/* Disable hover lift/scale effects on touch devices */
+@media (hover: none) {
+  .user-featured-row article,
+  .user-similar-scroll article,
+  .user-featured-grid article,
+  .user-benefits-grid > div,
+  .user-guidance-grid > article {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
 @media (max-width: 734px) {
   .mq-latest { grid-template-columns: 1fr !important; }
   .mq-diff { grid-template-columns: 1fr 1fr !important; }
   .mq-help { grid-template-columns: 1fr !important; }
+}
+
+/* ────────────────────────────────────────────────
+   USER PORTAL — RESPONSIVE
+   ──────────────────────────────────────────────── */
+
+/* Hamburger hidden by default */
+.user-hamburger {
+  display: none !important;
+}
+
+/* ── Tablet: ≤768px ── */
+@media (max-width: 768px) {
+  /* Navbar */
+  .user-nav-bar {
+    padding: 0 16px !important;
+  }
+
+  .user-nav-links {
+    display: none !important;
+  }
+
+  .user-nav-user {
+    display: none !important;
+  }
+
+  .user-hamburger {
+    display: flex !important;
+  }
+
+  .user-mega-menu {
+    display: none !important;
+  }
+
+  .user-brand-text {
+    font-size: 12px !important;
+  }
+
+  /* Steps grid in mega menu */
+  .user-steps-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Mega menu columns wrap */
+  .user-mega-cols {
+    flex-wrap: wrap !important;
+    gap: 30px 40px !important;
+    padding: 24px 20px 32px !important;
+  }
+
+  .user-steps-grid-wrap {
+    padding: 24px 20px 32px !important;
+  }
+}
+
+/* ── User pages: ≤1024px ── */
+@media (max-width: 1024px) {
+  /* HomePage: 5-col benefits → 3 */
+  .user-benefits-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  /* SearchPage: 4-col category → 2 */
+  .user-category-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* ListingPage: stats grid → 3 cols */
+  .user-stats-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  /* SearchPage: sidebars hidden, layout stacks */
+  .user-search-sidebar,
+  .user-search-sidebar-right {
+    display: none !important;
+  }
+
+  .user-search-layout {
+    flex-direction: column !important;
+  }
+
+  /* ListingPage: gallery stacks */
+  .user-gallery-grid {
+    flex-direction: column !important;
+  }
+
+  /* HomePage: featured grid stacks to 1 column */
+  .user-featured-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* HomePage: featured main card reduce min-height */
+  .user-featured-grid > article {
+    min-height: 340px !important;
+  }
+
+  .user-featured-grid > article > div:last-child {
+    min-height: 340px !important;
+  }
+
+  /* HomePage: side cards row switches to horizontal */
+  .user-featured-grid > div {
+    grid-template-rows: none !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* ── Search browse page: ≤768px — left-align, smaller text ── */
+@media (max-width: 768px) {
+  .user-browse-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .user-browse-title {
+    font-size: clamp(32px, 8vw, 48px) !important;
+  }
+
+  .user-browse-desc {
+    text-align: left !important;
+    font-size: 15px !important;
+  }
+
+  .user-cat-name {
+    font-size: 18px !important;
+  }
+
+  .user-cat-desc {
+    font-size: 13px !important;
+  }
+
+  .user-cat-label {
+    font-size: 10px !important;
+  }
+
+  .user-featured-heading {
+    font-size: 20px !important;
+  }
+
+  .user-feat-name {
+    font-size: 18px !important;
+  }
+
+  .user-feat-price {
+    font-size: 13px !important;
+  }
+
+  .user-feat-stats {
+    font-size: 11px !important;
+  }
+
+  .user-feat-tag {
+    font-size: 10px !important;
+  }
+}
+
+/* ── User pages: ≤768px (industry row becomes grid) ── */
+@media (max-width: 768px) {
+  /* HomePage: industry row → 4-per-row wrapping grid */
+  .user-industry-row {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 12px 8px !important;
+    overflow-x: visible !important;
+    scroll-snap-type: none !important;
+    padding: 8px 0 22px !important;
+  }
+
+  .user-industry-link {
+    width: auto !important;
+  }
+
+  .user-industry-img {
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 16px !important;
+  }
+
+  .user-industry-name {
+    font-size: 11px !important;
+  }
+
+  /* HomePage: benefits → 2 cols */
+  .user-benefits-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* HomePage: guidance → 1 col */
+  .user-guidance-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ListingPage: stats → 2 cols */
+  .user-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Footer → 1 col */
+  .user-footer-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Carousel rows: mandatory snap, near-full-width cards on mobile */
+  .user-featured-row {
+    scroll-snap-type: x mandatory !important;
+    gap: 12px !important;
+  }
+
+  .user-featured-row article {
+    flex: 0 0 calc(100vw - 44px) !important;
+    min-height: 320px !important;
+    scroll-snap-align: start !important;
+  }
+
+  .user-similar-scroll article {
+    flex: 0 0 260px !important;
+    min-height: 320px !important;
+  }
+
+  .user-similar-scroll .mq-row {
+    gap: 14px !important;
+  }
+
+  /* SearchPage: search input responsive */
+  .user-search-input {
+    font-size: 15px !important;
+  }
+
+  /* HomePage: hero subtitle → left-aligned */
+  .user-hero-sub {
+    text-align: left !important;
+    max-width: 100% !important;
+  }
+
+  /* HomePage: featured side cards stack to 1 col */
+  .user-featured-grid > div {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* HomePage: hero reduce top padding */
+  .user-hero-row {
+    gap: 12px !important;
+  }
+}
+
+/* ── Search result cards: ≤600px — stack vertically ── */
+@media (max-width: 600px) {
+  .user-result-card {
+    flex-wrap: wrap !important;
+    gap: 14px !important;
+    padding: 16px 0 !important;
+  }
+
+  .user-result-img {
+    width: 100% !important;
+    height: 180px !important;
+    border-radius: 12px !important;
+  }
+
+  .user-result-content {
+    flex: 1 1 100% !important;
+    order: 2 !important;
+  }
+
+  .user-result-meta {
+    flex: 1 1 100% !important;
+    order: 3 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    text-align: left !important;
+  }
+
+  .user-result-title {
+    font-size: 16px !important;
+  }
+
+  .user-result-desc {
+    font-size: 13px !important;
+  }
+}
+
+/* ── Search result cards: ≤768px — compact row ── */
+@media (min-width: 601px) and (max-width: 768px) {
+  .user-result-card {
+    gap: 16px !important;
+  }
+
+  .user-result-img {
+    width: 100px !important;
+    height: 75px !important;
+    border-radius: 10px !important;
+  }
+
+  .user-result-title {
+    font-size: 15px !important;
+  }
+
+  .user-result-price {
+    font-size: 15px !important;
+  }
+}
+
+/* ── Search bar: ≤768px — wrap filter pills ── */
+@media (max-width: 768px) {
+  .user-search-bar {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+}
+
+/* ── Search pagination: ≤480px ── */
+@media (max-width: 480px) {
+  .user-search-pagination {
+    gap: 6px !important;
+  }
+
+  .user-search-pagination button {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+  }
+
+  .user-search-pagination span {
+    font-size: 12px !important;
+    padding: 0 6px !important;
+  }
+}
+
+/* ── Mobile: ≤480px ── */
+@media (max-width: 480px) {
+  /* SearchPage: search input smaller on mobile */
+  .user-search-input {
+    font-size: 14px !important;
+  }
+
+  .user-search-input::placeholder {
+    font-size: 14px !important;
+  }
+
+  /* Browse page: even smaller text */
+  .user-browse-title {
+    font-size: 32px !important;
+  }
+
+  .user-browse-desc {
+    font-size: 14px !important;
+  }
+
+  .user-cat-name {
+    font-size: 16px !important;
+  }
+
+  .user-cat-desc {
+    font-size: 12px !important;
+  }
+
+  .user-featured-heading {
+    font-size: 18px !important;
+  }
+
+  .user-feat-name {
+    font-size: 16px !important;
+  }
+
+  .user-brand-text {
+    font-size: 11px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .user-steps-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* HomePage: benefits → 1 col */
+  .user-benefits-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* HomePage: benefits card reduce min-height */
+  .user-benefits-grid > div {
+    min-height: auto !important;
+    padding: 20px 18px !important;
+  }
+
+  /* SearchPage: category → 1 col */
+  .user-category-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ListingPage: stats → 1 col */
+  .user-stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* HomePage: featured main card shrink */
+  .user-featured-grid > article {
+    min-height: 280px !important;
+  }
+
+  .user-featured-grid > article > div:last-child {
+    min-height: 280px !important;
+  }
+
+  /* HomePage: featured stats row smaller text */
+  .user-featured-grid .user-featured-stats > div > div:last-child {
+    font-size: 18px !important;
+  }
+
+  /* Similar/featured cards smaller */
+  .user-similar-scroll article,
+  .user-featured-row article {
+    flex: 0 0 220px !important;
+    min-height: 280px !important;
+  }
+
+  /* CTA band stacks */
+  .user-cta-band {
+    flex-direction: column !important;
+    text-align: center !important;
+  }
+
+  .user-cta-band h3 {
+    font-size: 22px !important;
+  }
+
+  /* ListingPage: gallery main image reduce min-height */
+  .user-gallery-grid img {
+    min-height: 180px !important;
+  }
+
+  /* ListingPage: hero description smaller */
+  .user-listing-hero-desc {
+    font-size: 16px !important;
+  }
+
+  /* ListingPage: hero asking price text */
+  .user-listing-hero-price {
+    font-size: 14px !important;
+  }
 }
 
 /* ────────────────────────────────────────────────
@@ -249,6 +701,33 @@ input::placeholder {
   }
 }
 
+/* Inline forms (Country/Industry add/edit) stack on mobile */
+@media (max-width: 600px) {
+  .admin-inline-form {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .admin-inline-form button {
+    width: 100% !important;
+  }
+
+  /* DataTable: ensure min-width for horizontal scroll */
+  .admin-table {
+    min-width: 540px;
+  }
+
+  /* Admin modal actions wrap */
+  .admin-modal-body > div:last-child {
+    gap: 8px !important;
+  }
+
+  /* Admin bulk operations buttons */
+  .admin-form-card button {
+    font-size: 13px !important;
+  }
+}
+
 /* ── Small phones: ≤400px ── */
 @media (max-width: 400px) {
   .admin-stats-grid {
@@ -257,5 +736,79 @@ input::placeholder {
 
   .admin-nav .admin-name {
     display: none !important;
+  }
+
+  /* Admin page title smaller */
+  .admin-page-header h1 {
+    font-size: 22px !important;
+  }
+
+  .admin-page-header p {
+    font-size: 13px !important;
+  }
+
+  /* Admin header buttons compact */
+  .admin-header-btn {
+    padding: 7px 14px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* ────────────────────────────────────────────────
+   LOGIN / AUTH PAGES — RESPONSIVE
+   ──────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  /* Login page footer text wraps */
+  .login-footer {
+    font-size: 9px !important;
+    letter-spacing: 0.1em !important;
+    text-align: center !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    padding: 20px 16px !important;
+  }
+
+  /* Glass panel padding on small screens */
+  .login-glass-panel {
+    padding: 28px 22px 24px !important;
+  }
+
+  /* Visa/badge row wraps tighter */
+  .login-badges {
+    gap: 8px !important;
+  }
+
+  .login-badges span {
+    font-size: 10px !important;
+  }
+}
+
+/* ────────────────────────────────────────────────
+   USER INQUIRY MODAL — RESPONSIVE
+   ──────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .user-inquiry-modal {
+    padding: 28px 20px 24px !important;
+  }
+
+  .user-inquiry-pills {
+    flex-direction: column !important;
+  }
+
+  .user-inquiry-pills button {
+    font-size: 12px !important;
+  }
+
+  /* ListingPage: hero buttons stack on mobile */
+  .user-listing-hero-actions {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  .user-listing-hero-actions button {
+    width: 100% !important;
+    max-width: 300px !important;
   }
 }

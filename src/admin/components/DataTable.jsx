@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Loader from '../../components/Loader';
+import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 
 export default function DataTable({
   columns,
@@ -9,8 +10,20 @@ export default function DataTable({
   actions,
   pagination,
   onPageChange,
+  hasMore,
+  loadingMore,
 }) {
   const [hoveredRow, setHoveredRow] = useState(null);
+
+  useInfiniteScroll({
+    hasMore: !!hasMore,
+    loading: !!loadingMore,
+    onLoadMore: () => {
+      if (onPageChange && pagination) {
+        onPageChange((pagination.page || 1) + 1);
+      }
+    },
+  });
 
   if (loading) {
     return <Loader text="Loading data..." />;
@@ -39,18 +52,6 @@ export default function DataTable({
       </div>
     );
   }
-
-  const getPageNumbers = () => {
-    if (!pagination) return [];
-    const pages = [];
-    const total = pagination.totalPages || 1;
-    const current = pagination.page || 1;
-    const delta = 2;
-    for (let i = Math.max(1, current - delta); i <= Math.min(total, current + delta); i++) {
-      pages.push(i);
-    }
-    return pages;
-  };
 
   return (
     <div>
@@ -174,67 +175,24 @@ export default function DataTable({
         </table>
       </div>
 
-      {pagination && pagination.totalPages > 1 && (
-        <div className="admin-pagination" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 24 }}>
-          <button
-            disabled={pagination.page <= 1}
-            onClick={() => onPageChange(pagination.page - 1)}
-            style={{
-              padding: '8px 16px',
-              border: '1px solid rgba(0,0,0,0.08)',
-              borderRadius: 980,
-              background: '#fff',
-              cursor: pagination.page <= 1 ? 'default' : 'pointer',
-              opacity: pagination.page <= 1 ? 0.4 : 1,
-              fontSize: 13,
-              color: '#1d1d1f',
-              fontWeight: 500,
-              transition: 'all 0.15s',
-            }}
-          >
-            Previous
-          </button>
-          {getPageNumbers().map((num) => (
-            <button
-              key={num}
-              onClick={() => onPageChange(num)}
-              style={{
-                width: 36,
-                height: 36,
-                border: num === pagination.page ? 'none' : '1px solid rgba(0,0,0,0.08)',
-                borderRadius: 980,
-                background: num === pagination.page ? '#0066cc' : '#fff',
-                color: num === pagination.page ? '#fff' : '#1d1d1f',
-                cursor: 'pointer',
-                fontSize: 13,
-                fontWeight: num === pagination.page ? 600 : 400,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.15s',
-              }}
-            >
-              {num}
-            </button>
-          ))}
-          <button
-            disabled={pagination.page >= pagination.totalPages}
-            onClick={() => onPageChange(pagination.page + 1)}
-            style={{
-              padding: '8px 16px',
-              border: '1px solid rgba(0,0,0,0.08)',
-              borderRadius: 980,
-              background: '#fff',
-              cursor: pagination.page >= pagination.totalPages ? 'default' : 'pointer',
-              opacity: pagination.page >= pagination.totalPages ? 0.4 : 1,
-              fontSize: 13,
-              color: '#1d1d1f',
-              fontWeight: 500,
-              transition: 'all 0.15s',
-            }}
-          >
-            Next
-          </button>
+      {/* Infinite scroll loading indicator */}
+      {loadingMore && (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 0' }}>
+          <div style={{
+            width: 24,
+            height: 24,
+            border: '3px solid rgba(0,0,0,0.08)',
+            borderTopColor: '#0066cc',
+            borderRadius: '50%',
+            animation: 'dt-spin 0.7s linear infinite',
+          }} />
+          <style>{`@keyframes dt-spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
+
+      {!loadingMore && !hasMore && data.length > 0 && pagination && pagination.total > data.length === false && (
+        <div style={{ textAlign: 'center', padding: '16px 0', fontSize: 12, color: '#86868b' }}>
+          Showing all {data.length} records
         </div>
       )}
     </div>

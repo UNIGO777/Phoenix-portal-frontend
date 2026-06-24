@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Diamond, Search, User, ChevronRight } from 'lucide-react';
+import { Diamond, Search, User, ChevronRight, Menu, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 
 const navItems = [
   { name: 'Marketplace', to: '/home' },
   { name: 'Industries', to: '/search' },
+  { name: 'Countries', to: '/search' },
   { name: 'How It Works', to: '#' },
 ];
 
@@ -54,10 +55,16 @@ export default function Navbar() {
   const [showUser, setShowUser] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
   const [industries, setIndustries] = useState([]);
+  const [countries, setCountries] = useState([]);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const closeTimer = useRef(null);
 
   useEffect(() => {
     api.get('/industries').then((r) => setIndustries(r.data.data || [])).catch(() => {});
+    api.get('/countries').then((r) => {
+      const d = r.data;
+      setCountries(Array.isArray(d) ? d : d.data || []);
+    }).catch(() => {});
   }, []);
 
   // Build Industries menu columns dynamically (split into columns of 5)
@@ -74,12 +81,27 @@ export default function Navbar() {
     });
   }
 
+  // Build Countries columns (split into columns of 5)
+  const countryColumns = [];
+  for (let i = 0; i < countries.length; i += perCol) {
+    const chunk = countries.slice(i, i + perCol);
+    countryColumns.push({
+      label: i === 0 ? 'Regions' : '\u00A0',
+      fs: 18,
+      fw: 600,
+      gap: 12,
+      links: chunk.map((c) => ({ text: c.name, to: `/search?country=${c._id}` })),
+    });
+  }
+
   const menus = {
     ...staticMenus,
     ...(industryColumns.length > 0 ? { Industries: industryColumns } : {}),
+    ...(countryColumns.length > 0 ? { Countries: countryColumns } : {}),
   };
 
   const handleLogout = async () => {
+    setMobileOpen(false);
     await logout();
     navigate('/');
   };
@@ -116,6 +138,7 @@ export default function Navbar() {
         }}
       >
         <div
+          className="user-nav-bar"
           style={{
             margin: 0,
             padding: '0 40px',
@@ -123,6 +146,7 @@ export default function Navbar() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            position: 'relative',
           }}
         >
           <Link
@@ -137,14 +161,20 @@ export default function Navbar() {
               letterSpacing: '0.02em',
               color: '#1d1d1f',
               textDecoration: 'none',
+              flexShrink: 0,
             }}
           >
             <Diamond size={13} color="#1d1d1f" fill="#1d1d1f" />
-            <span>PHOENIX BUSINESS EXCHANGE</span>
+            <span className="user-brand-text">PHOENIX BUSINESS EXCHANGE</span>
           </Link>
 
+          {/* Desktop nav items */}
           <div
+            className="user-nav-links"
             style={{
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)',
               display: 'flex',
               alignItems: 'center',
               gap: 30,
@@ -181,7 +211,9 @@ export default function Navbar() {
             >
               <Search size={18} />
             </Link>
-            <div style={{ position: 'relative' }}>
+
+            {/* Desktop user icon */}
+            <div className="user-nav-user" style={{ position: 'relative' }}>
               <span
                 style={{ opacity: 0.82, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                 onMouseEnter={() => setOpenMenu(null)}
@@ -233,13 +265,160 @@ export default function Navbar() {
                 </div>
               )}
             </div>
+
+            {/* Mobile hamburger */}
+            <button
+              className="user-hamburger"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              style={{
+                display: 'none',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: 0,
+                color: '#1d1d1f',
+              }}
+            >
+              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
           </div>
         </div>
       </nav>
 
-      {/* Mega Menu */}
+      {/* Mobile slide-down menu */}
       <AnimatePresence>
-        {openMenu && (isSteps || activeCols.length > 0) && (
+        {mobileOpen && (
+          <motion.div
+            className="user-mobile-menu"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              top: 48,
+              zIndex: 3,
+              background: 'rgba(255,255,255,0.98)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              borderBottom: '1px solid rgba(0,0,0,0.08)',
+              overflow: 'hidden',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+            }}
+          >
+            <div style={{ padding: '16px 20px' }}>
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.to === '#' ? '/search' : item.to}
+                  onClick={() => setMobileOpen(false)}
+                  style={{
+                    display: 'block',
+                    padding: '14px 0',
+                    fontSize: 16,
+                    fontWeight: 500,
+                    color: '#1d1d1f',
+                    textDecoration: 'none',
+                    borderBottom: '1px solid rgba(0,0,0,0.06)',
+                  }}
+                >
+                  {item.name}
+                </Link>
+              ))}
+
+              {/* Industries in mobile */}
+              {industries.length > 0 && (
+                <div style={{ paddingTop: 12 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
+                    Industries
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+                    {industries.slice(0, 12).map((ind) => (
+                      <Link
+                        key={ind._id}
+                        to={`/search?industry=${ind._id}`}
+                        onClick={() => setMobileOpen(false)}
+                        style={{
+                          fontSize: 13,
+                          color: '#0066cc',
+                          textDecoration: 'none',
+                          padding: '6px 14px',
+                          background: 'rgba(0,102,204,0.06)',
+                          borderRadius: 980,
+                        }}
+                      >
+                        {ind.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Countries in mobile */}
+              {countries.length > 0 && (
+                <div style={{ paddingTop: 4 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
+                    Countries
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+                    {countries.slice(0, 12).map((c) => (
+                      <Link
+                        key={c._id}
+                        to={`/search?country=${c._id}`}
+                        onClick={() => setMobileOpen(false)}
+                        style={{
+                          fontSize: 13,
+                          color: '#1d1d1f',
+                          textDecoration: 'none',
+                          padding: '6px 14px',
+                          background: 'rgba(0,0,0,0.04)',
+                          borderRadius: 980,
+                        }}
+                      >
+                        {c.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* User info + logout */}
+              {user && (
+                <div style={{ paddingTop: 12, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f', marginBottom: 2 }}>
+                    {user.fullName}
+                  </div>
+                  <div style={{ fontSize: 12, color: '#86868b', marginBottom: 12 }}>{user.email}</div>
+                  <button
+                    onClick={handleLogout}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid rgba(255,59,48,0.2)',
+                      background: 'rgba(255,59,48,0.06)',
+                      color: '#ff3b30',
+                      borderRadius: 12,
+                      fontSize: 14,
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop Mega Menu */}
+      <AnimatePresence>
+        {openMenu && !mobileOpen && (isSteps || activeCols.length > 0) && (
           <>
             {/* Backdrop */}
             <motion.div
@@ -262,6 +441,7 @@ export default function Navbar() {
             />
             {/* Panel */}
             <motion.div
+              className="user-mega-menu"
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
@@ -283,6 +463,7 @@ export default function Navbar() {
               {isSteps ? (
                 /* How It Works — Steps */
                 <div
+                  className="user-steps-grid-wrap"
                   style={{
                     maxWidth: 1100,
                     margin: '0 auto',
@@ -292,7 +473,7 @@ export default function Navbar() {
                   <div style={{ fontSize: 12, fontWeight: 600, color: '#86868b', marginBottom: 24 }}>
                     How It Works
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24 }}>
+                  <div className="user-steps-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24 }}>
                     {steps.map((step, i) => (
                       <motion.div
                         key={step.number}
@@ -350,6 +531,7 @@ export default function Navbar() {
               ) : (
                 /* Regular Mega Menu */
                 <div
+                  className="user-mega-cols"
                   style={{
                     maxWidth: 1100,
                     margin: '0 auto',

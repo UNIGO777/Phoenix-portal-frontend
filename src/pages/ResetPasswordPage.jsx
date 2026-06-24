@@ -162,6 +162,7 @@ export default function ResetPasswordPage() {
         }}
       >
         <div
+          className="login-glass-panel"
           style={{
             width: '100%',
             padding: '36px 34px 30px',
@@ -375,6 +376,7 @@ export default function ResetPasswordPage() {
 
       {/* Footer */}
       <div
+        className="login-footer"
         style={{
           position: 'relative',
           zIndex: 3,

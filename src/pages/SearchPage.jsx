@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, X, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Search, X, ChevronRight } from 'lucide-react';
 import api from '../services/api';
 import Layout from '../components/layout/Layout';
 import Loader from '../components/Loader';
+import useInfiniteScroll from '../hooks/useInfiniteScroll';
 
 const defaultImg = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80';
 const defaultIndustryImg = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&q=80';
@@ -28,10 +29,12 @@ export default function SearchPage() {
 
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [activeIndustry, setActiveIndustry] = useState(searchParams.get('industry') || '');
+  const [activeCountry, setActiveCountry] = useState(searchParams.get('country') || '');
   const [activeSort, setActiveSort] = useState(searchParams.get('sort') || '');
   const [page, setPage] = useState(1);
 
   const [industries, setIndustries] = useState([]);
+  const [countries, setCountries] = useState([]);
   const [businesses, setBusinesses] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
@@ -47,17 +50,23 @@ export default function SearchPage() {
   // Sync state from URL when params change externally (e.g. navbar click)
   useEffect(() => {
     const urlIndustry = searchParams.get('industry') || '';
+    const urlCountry = searchParams.get('country') || '';
     const urlQuery = searchParams.get('q') || '';
     const urlSort = searchParams.get('sort') || '';
     if (urlIndustry !== activeIndustry) setActiveIndustry(urlIndustry);
+    if (urlCountry !== activeCountry) setActiveCountry(urlCountry);
     if (urlQuery !== query) setQuery(urlQuery);
     if (urlSort !== activeSort) setActiveSort(urlSort);
   }, [searchParams]);
 
-  // Load industries on mount
+  // Load industries & countries on mount
   useEffect(() => {
     Promise.all([
       api.get('/industries').then((r) => setIndustries(r.data.data || [])).catch(() => {}),
+      api.get('/countries').then((r) => {
+        const d = r.data;
+        setCountries(Array.isArray(d) ? d : d.data || []);
+      }).catch(() => {}),
       api.get('/featured').then((r) => setFeatured(r.data.data || [])).catch(() => {}),
     ]).finally(() => setBrowseLoading(false));
   }, []);
@@ -66,32 +75,42 @@ export default function SearchPage() {
   const fetchBusinesses = useCallback(async () => {
     setLoading(true);
     try {
-      const params = { page, limit: 12 };
+      const params = { page, limit: 20 };
       if (query) params.search = query;
       if (activeIndustry) params.industry = activeIndustry;
+      if (activeCountry) params.country = activeCountry;
       if (activeSort) params.sort = activeSort;
       const { data } = await api.get('/businesses', { params });
-      setBusinesses(data.data || []);
+      const newItems = data.data || [];
+      setBusinesses((prev) => (page === 1 ? newItems : [...prev, ...newItems]));
       setTotalPages(data.pagination?.totalPages || 1);
       setTotal(data.pagination?.total || 0);
     } catch {
-      setBusinesses([]);
+      if (page === 1) setBusinesses([]);
     }
     setLoading(false);
-  }, [query, activeIndustry, activeSort, page]);
+  }, [query, activeIndustry, activeCountry, activeSort, page]);
 
   useEffect(() => {
     fetchBusinesses();
   }, [fetchBusinesses]);
+
+  const hasMore = page < totalPages;
+  useInfiniteScroll({
+    hasMore,
+    loading,
+    onLoadMore: () => setPage((p) => p + 1),
+  });
 
   // Update URL params
   useEffect(() => {
     const p = {};
     if (query) p.q = query;
     if (activeIndustry) p.industry = activeIndustry;
+    if (activeCountry) p.country = activeCountry;
     if (activeSort) p.sort = activeSort;
     setSearchParams(p, { replace: true });
-  }, [query, activeIndustry, activeSort, setSearchParams]);
+  }, [query, activeIndustry, activeCountry, activeSort, setSearchParams]);
 
   // Suggestions
   const handleInputChange = (val) => {
@@ -126,9 +145,17 @@ export default function SearchPage() {
     setPage(1);
   };
 
-  const hasSearch = query || activeIndustry;
+  const selectCountry = (id) => {
+    setActiveCountry(id === activeCountry ? '' : id);
+    setPage(1);
+  };
+
+  const hasSearch = query || activeIndustry || activeCountry;
   const industryName = activeIndustry
     ? industries.find((i) => i._id === activeIndustry)?.name
+    : '';
+  const countryName = activeCountry
+    ? countries.find((c) => c._id === activeCountry)?.name
     : '';
 
   return (
@@ -146,16 +173,18 @@ export default function SearchPage() {
         }}
       >
         <div
+          className="user-search-bar"
           style={{
-            padding: '0 40px',
-            height: 56,
+            padding: '0 clamp(16px, 5vw, 40px)',
+            minHeight: 56,
             display: 'flex',
             alignItems: 'center',
             gap: 12,
             position: 'relative',
+            flexWrap: 'wrap',
           }}
         >
-          <Search size={18} color="#86868b" />
+          <Search size={18} color="#86868b" style={{ flexShrink: 0 }} />
           <input
             ref={searchInputRef}
             type="text"
@@ -164,6 +193,7 @@ export default function SearchPage() {
             onChange={(e) => handleInputChange(e.target.value)}
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            className="user-search-input"
             style={{
               flex: 1,
               border: 'none',
@@ -172,6 +202,7 @@ export default function SearchPage() {
               color: '#1d1d1f',
               outline: 'none',
               fontFamily: 'inherit',
+              minWidth: 0,
             }}
           />
           {query && (
@@ -215,6 +246,28 @@ export default function SearchPage() {
               </span>
             </span>
           )}
+          {countryName && (
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                fontSize: 13,
+                color: '#1d1d1f',
+                background: 'rgba(0,0,0,0.06)',
+                padding: '5px 12px',
+                borderRadius: 980,
+              }}
+            >
+              {countryName}
+              <span
+                onClick={() => setActiveCountry('')}
+                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+              >
+                <X size={14} />
+              </span>
+            </span>
+          )}
 
           {/* Suggestions dropdown */}
           {showSuggestions && suggestions.length > 0 && (
@@ -222,8 +275,8 @@ export default function SearchPage() {
               style={{
                 position: 'absolute',
                 top: '100%',
-                left: 40,
-                right: 40,
+                left: 'clamp(16px, 5vw, 40px)',
+                right: 'clamp(16px, 5vw, 40px)',
                 background: '#fff',
                 borderRadius: 14,
                 boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
@@ -266,8 +319,9 @@ export default function SearchPage() {
 
       {/* Browse Header (when no search) */}
       {!hasSearch && !browseLoading && (
-        <header style={{ padding: '64px 40px 48px' }}>
+        <header style={{ padding: 'clamp(32px, 6vw, 64px) clamp(16px, 5vw, 40px) clamp(24px, 5vw, 48px)' }}>
           <div
+            className="user-browse-header"
             style={{
               display: 'flex',
               flexWrap: 'wrap',
@@ -277,6 +331,7 @@ export default function SearchPage() {
             }}
           >
             <h1
+              className="user-browse-title"
               style={{
                 fontSize: 'clamp(44px, 7vw, 80px)',
                 fontWeight: 600,
@@ -289,6 +344,7 @@ export default function SearchPage() {
               Browse
             </h1>
             <p
+              className="user-browse-desc"
               style={{
                 fontSize: 'clamp(17px, 2vw, 21px)',
                 fontWeight: 500,
@@ -307,8 +363,9 @@ export default function SearchPage() {
 
       {/* Category Tiles (when no search) */}
       {!hasSearch && !browseLoading && industries.length > 0 && (
-        <section style={{ padding: '0 40px 40px' }}>
+        <section style={{ padding: '0 clamp(16px, 5vw, 40px) clamp(16px, 5vw, 40px)' }}>
           <div
+            className="user-category-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(4, 1fr)',
@@ -363,13 +420,14 @@ export default function SearchPage() {
                   style={{
                     position: 'relative',
                     zIndex: 2,
-                    padding: 30,
+                    padding: 'clamp(16px, 4vw, 30px)',
                     display: 'flex',
                     flexDirection: 'column',
                     minHeight: 210,
                   }}
                 >
                   <div
+                    className="user-cat-label"
                     style={{
                       fontSize: 12,
                       fontWeight: 600,
@@ -382,6 +440,7 @@ export default function SearchPage() {
                     Industry
                   </div>
                   <h3
+                    className="user-cat-name"
                     style={{
                       fontSize: 24,
                       fontWeight: 600,
@@ -393,7 +452,7 @@ export default function SearchPage() {
                   >
                     {cat.name}
                   </h3>
-                  <p style={{ fontSize: 15, color: '#6e6e73', margin: 0, lineHeight: 1.4 }}>
+                  <p className="user-cat-desc" style={{ fontSize: 15, color: '#6e6e73', margin: 0, lineHeight: 1.4 }}>
                     Explore opportunities
                   </p>
                 </div>
@@ -406,8 +465,9 @@ export default function SearchPage() {
       {/* Featured Carousel (when no search) */}
       {!hasSearch && !browseLoading && featured.length > 0 && (
         <section style={{ padding: '8px 0 40px' }}>
-          <div style={{ padding: '0 40px' }}>
+          <div style={{ padding: '0 clamp(16px, 5vw, 40px)' }}>
             <h2
+              className="user-featured-heading"
               style={{
                 fontSize: 'clamp(22px, 2.6vw, 28px)',
                 fontWeight: 600,
@@ -426,7 +486,7 @@ export default function SearchPage() {
               gap: 20,
               overflowX: 'auto',
               padding: '4px 0 22px',
-              margin: '0 40px',
+              margin: '0 clamp(16px, 5vw, 40px)',
             }}
           >
             {featured.map((l) => (
@@ -474,10 +534,11 @@ export default function SearchPage() {
                     minHeight: 400,
                   }}
                 >
-                  <div style={{ fontSize: 12, color: '#cdd4e0', marginBottom: 'auto' }}>
+                  <div className="user-feat-tag" style={{ fontSize: 12, color: '#cdd4e0', marginBottom: 'auto' }}>
                     {l.industry?.name} · {l.country?.name}
                   </div>
                   <h3
+                    className="user-feat-name"
                     style={{
                       fontSize: 22,
                       fontWeight: 600,
@@ -488,10 +549,10 @@ export default function SearchPage() {
                   >
                     {l.name}
                   </h3>
-                  <div style={{ fontSize: 15 }}>
+                  <div className="user-feat-price" style={{ fontSize: 15 }}>
                     Asking <strong>{formatPrice(l.askingPrice)}</strong>
                   </div>
-                  <div style={{ fontSize: 13, color: '#c2c9d6', marginTop: 2 }}>
+                  <div className="user-feat-stats" style={{ fontSize: 13, color: '#c2c9d6', marginTop: 2 }}>
                     {l.numEmployees ? `${l.numEmployees} employees` : ''}{' '}
                     {l.yearEstablished ? `· Est. ${l.yearEstablished}` : ''}
                   </div>
@@ -504,9 +565,9 @@ export default function SearchPage() {
 
       {/* Results View */}
       {hasSearch && (
-        <div style={{ display: 'flex', padding: '32px 40px 60px', gap: 40 }}>
+        <div className="user-search-layout" style={{ display: 'flex', padding: 'clamp(16px, 4vw, 32px) clamp(16px, 5vw, 40px) clamp(24px, 5vw, 60px)', gap: 40 }}>
           {/* Sidebar */}
-          <aside style={{ flex: '0 0 220px', position: 'sticky', top: 170, alignSelf: 'flex-start' }}>
+          <aside className="user-search-sidebar" style={{ flex: '0 0 220px', position: 'sticky', top: 170, alignSelf: 'flex-start' }}>
             {/* Industries filter */}
             <div style={{ marginBottom: 32 }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: '#86868b', marginBottom: 14 }}>
@@ -560,7 +621,7 @@ export default function SearchPage() {
               {loading ? '' : `${total} result${total !== 1 ? 's' : ''}`}
             </div>
 
-            {loading && (
+            {loading && page === 1 && (
               <Loader text="Searching..." />
             )}
 
@@ -591,9 +652,10 @@ export default function SearchPage() {
               </div>
             )}
 
-            {businesses.map((biz) => (
+            {!loading && businesses.map((biz) => (
               <div
                 key={biz._id}
+                className="user-result-card"
                 onClick={() => navigate(`/listing/${biz._id}`)}
                 style={{
                   display: 'flex',
@@ -610,9 +672,10 @@ export default function SearchPage() {
                 <img
                   src={biz.images?.[0] || defaultImg}
                   alt=""
+                  className="user-result-img"
                   style={{
-                    width: 132,
-                    height: 96,
+                    width: 'clamp(80px, 12vw, 132px)',
+                    height: 'clamp(60px, 9vw, 96px)',
                     borderRadius: 14,
                     objectFit: 'cover',
                     flexShrink: 0,
@@ -620,8 +683,9 @@ export default function SearchPage() {
                 />
 
                 {/* Content */}
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="user-result-content" style={{ flex: 1, minWidth: 0 }}>
                   <div
+                    className="user-result-tag"
                     style={{
                       fontSize: 11,
                       fontWeight: 600,
@@ -635,6 +699,7 @@ export default function SearchPage() {
                     {biz.country?.name ? ` · ${biz.country.name}` : ''}
                   </div>
                   <div
+                    className="user-result-title"
                     style={{
                       fontSize: 18,
                       fontWeight: 600,
@@ -645,14 +710,14 @@ export default function SearchPage() {
                   >
                     {biz.name}
                   </div>
-                  <div style={{ fontSize: 14, color: '#6e6e73', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  <div className="user-result-desc" style={{ fontSize: 14, color: '#6e6e73', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {biz.description || biz.city || 'Premium business opportunity'}
                   </div>
                 </div>
 
                 {/* Price/stats */}
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ fontSize: 18, fontWeight: 600, color: '#1d1d1f' }}>
+                <div className="user-result-meta" style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div className="user-result-price" style={{ fontSize: 18, fontWeight: 600, color: '#1d1d1f' }}>
                     {formatPrice(biz.askingPrice)}
                   </div>
                   <div style={{ fontSize: 13, color: '#86868b', marginTop: 4 }}>
@@ -672,62 +737,50 @@ export default function SearchPage() {
               </div>
             ))}
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  gap: 8,
-                  marginTop: 32,
-                }}
-              >
-                <button
-                  disabled={page <= 1}
-                  onClick={() => setPage(page - 1)}
-                  style={{
-                    border: '1px solid rgba(0,0,0,0.12)',
-                    background: '#fff',
-                    borderRadius: 8,
-                    padding: '8px 16px',
-                    fontSize: 14,
-                    cursor: page <= 1 ? 'default' : 'pointer',
-                    opacity: page <= 1 ? 0.4 : 1,
-                    color: '#1d1d1f',
-                  }}
-                >
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ChevronLeft size={14} /> Previous</span>
-                </button>
-                <span
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    fontSize: 14,
-                    color: '#6e6e73',
-                    padding: '0 12px',
-                  }}
-                >
-                  Page {page} of {totalPages}
-                </span>
-                <button
-                  disabled={page >= totalPages}
-                  onClick={() => setPage(page + 1)}
-                  style={{
-                    border: '1px solid rgba(0,0,0,0.12)',
-                    background: '#fff',
-                    borderRadius: 8,
-                    padding: '8px 16px',
-                    fontSize: 14,
-                    cursor: page >= totalPages ? 'default' : 'pointer',
-                    opacity: page >= totalPages ? 0.4 : 1,
-                    color: '#1d1d1f',
-                  }}
-                >
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>Next <ChevronRight size={14} /></span>
-                </button>
+            {/* Infinite scroll loading indicator */}
+            {loading && page > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
+                <div style={{
+                  width: 28,
+                  height: 28,
+                  border: '3px solid rgba(0,0,0,0.08)',
+                  borderTopColor: '#0066cc',
+                  borderRadius: '50%',
+                  animation: 'spin 0.7s linear infinite',
+                }} />
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+              </div>
+            )}
+
+            {!loading && !hasMore && businesses.length > 0 && (
+              <div style={{ textAlign: 'center', padding: '24px 0', fontSize: 13, color: '#86868b' }}>
+                Showing all {total} results
               </div>
             )}
           </div>
+
+          {/* Right sidebar — Countries */}
+          <aside className="user-search-sidebar-right" style={{ flex: '0 0 200px', position: 'sticky', top: 170, alignSelf: 'flex-start' }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#86868b', marginBottom: 14 }}>
+              COUNTRIES
+            </div>
+            {countries.map((c) => (
+              <div
+                key={c._id}
+                onClick={() => selectCountry(c._id)}
+                style={{
+                  padding: '8px 0',
+                  fontSize: 14,
+                  color: activeCountry === c._id ? '#0066cc' : '#1d1d1f',
+                  fontWeight: activeCountry === c._id ? 600 : 400,
+                  cursor: 'pointer',
+                  transition: 'color 0.15s',
+                }}
+              >
+                {c.name}
+              </div>
+            ))}
+          </aside>
         </div>
       )}
     </Layout>

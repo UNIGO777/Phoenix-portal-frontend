@@ -156,6 +156,7 @@ export default function LoginPage() {
         }}
       >
         <div
+          className="login-glass-panel"
           style={{
             width: '100%',
             padding: '36px 34px 30px',
@@ -523,6 +524,7 @@ export default function LoginPage() {
 
                 {/* Visa badges */}
                 <div
+                  className="login-badges"
                   style={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -560,6 +562,7 @@ export default function LoginPage() {
 
       {/* Footer */}
       <div
+        className="login-footer"
         style={{
           position: 'relative',
           zIndex: 3,

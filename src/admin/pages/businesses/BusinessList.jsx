@@ -34,6 +34,7 @@ export default function BusinessList() {
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [search, setSearch] = useState('');
   const [searchDebounced, setSearchDebounced] = useState('');
 
@@ -42,33 +43,43 @@ export default function BusinessList() {
     const timer = setTimeout(() => {
       setSearchDebounced(search);
       setPage(1);
+      setBusinesses([]);
     }, 400);
     return () => clearTimeout(timer);
   }, [search]);
 
   const fetchBusinesses = useCallback(() => {
-    setLoading(true);
+    const isFirstPage = page === 1;
+    if (isFirstPage) setLoading(true);
+    else setLoadingMore(true);
+
     const filters = searchDebounced ? { search: searchDebounced } : {};
     businessService.getAll(page, 20, filters)
       .then(({ data }) => {
-        setBusinesses(data.data);
+        setBusinesses((prev) => (isFirstPage ? data.data : [...prev, ...data.data]));
         setPagination(data.pagination);
       })
       .catch((err) => {
         console.error('Failed to fetch businesses:', err);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        setLoadingMore(false);
+      });
   }, [page, searchDebounced]);
 
   useEffect(() => {
     fetchBusinesses();
   }, [fetchBusinesses]);
 
+  const hasMore = page < (pagination.totalPages || 1);
+
   const handleDelete = async (id, name) => {
     if (!confirm(`Delete business "${name}"? This action cannot be undone.`)) return;
     try {
       await businessService.delete(id);
-      fetchBusinesses();
+      setPage(1);
+      setBusinesses([]);
     } catch (err) {
       alert('Failed to delete business: ' + (err.response?.data?.message || err.message));
     }
@@ -77,7 +88,10 @@ export default function BusinessList() {
   const handleToggleFeatured = async (id) => {
     try {
       await businessService.toggleFeatured(id);
-      fetchBusinesses();
+      // Update inline to avoid full refetch
+      setBusinesses((prev) =>
+        prev.map((b) => (b._id === id ? { ...b, isFeatured: !b.isFeatured } : b))
+      );
     } catch (err) {
       alert('Failed to update featured status: ' + (err.response?.data?.message || err.message));
     }
@@ -89,7 +103,9 @@ export default function BusinessList() {
     if (!confirm(`Are you sure you want to ${actionLabel} "${name}"?`)) return;
     try {
       await businessService.changeStatus(id, newStatus);
-      fetchBusinesses();
+      setBusinesses((prev) =>
+        prev.map((b) => (b._id === id ? { ...b, status: newStatus } : b))
+      );
     } catch (err) {
       alert('Failed to update business status: ' + (err.response?.data?.message || err.message));
     }
@@ -283,6 +299,8 @@ export default function BusinessList() {
             ]}
             data={businesses}
             loading={loading}
+            loadingMore={loadingMore}
+            hasMore={hasMore}
             pagination={pagination}
             onPageChange={setPage}
             actions={(business) => [

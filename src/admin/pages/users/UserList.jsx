@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { userService } from '../../services/adminApi';
@@ -20,28 +20,39 @@ export default function UserList() {
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  useEffect(() => {
-    setLoading(true);
+  const fetchUsers = useCallback(() => {
+    const isFirstPage = page === 1;
+    if (isFirstPage) setLoading(true);
+    else setLoadingMore(true);
+
     userService.getAll(page, 20)
       .then(({ data }) => {
-        setUsers(data.data);
+        setUsers((prev) => (isFirstPage ? data.data : [...prev, ...data.data]));
         setPagination(data.pagination);
       })
       .catch((err) => {
         console.error('Failed to fetch users:', err);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        setLoadingMore(false);
+      });
   }, [page]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const hasMore = page < (pagination.totalPages || 1);
 
   const handleDelete = async (id, fullName) => {
     if (!confirm(`Delete user "${fullName}"?`)) return;
     try {
       await userService.delete(id);
-      userService.getAll(page, 20).then(({ data }) => {
-        setUsers(data.data);
-        setPagination(data.pagination);
-      });
+      setPage(1);
+      setUsers([]);
     } catch (err) {
       alert('Failed to delete user: ' + err.response?.data?.message);
     }
@@ -54,10 +65,9 @@ export default function UserList() {
       } else {
         await userService.activate(id);
       }
-      userService.getAll(page, 20).then(({ data }) => {
-        setUsers(data.data);
-        setPagination(data.pagination);
-      });
+      setUsers((prev) =>
+        prev.map((u) => (u._id === id ? { ...u, isActive: !currentStatus } : u))
+      );
     } catch (err) {
       alert('Failed to update user status: ' + err.response?.data?.message);
     }
@@ -193,6 +203,8 @@ export default function UserList() {
             ]}
             data={users}
             loading={loading}
+            loadingMore={loadingMore}
+            hasMore={hasMore}
             pagination={pagination}
             onPageChange={setPage}
             actions={(user) => [

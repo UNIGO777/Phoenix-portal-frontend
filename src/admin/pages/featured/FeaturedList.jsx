@@ -62,8 +62,8 @@ export default function FeaturedList() {
   const handleSaveOrder = async () => {
     setSaving(true);
     try {
-      const ids = items.map((item) => item._id);
-      await featuredService.updateOrder(ids);
+      const order = items.map((item, index) => ({ id: item._id, position: index }));
+      await featuredService.updateOrder(order);
       setDirty(false);
     } catch (err) {
       alert('Failed to save order: ' + (err.response?.data?.message || err.message));

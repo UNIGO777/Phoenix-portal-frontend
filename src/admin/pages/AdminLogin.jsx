@@ -140,6 +140,7 @@ export default function AdminLogin() {
         }}
       >
         <div
+          className="login-glass-panel"
           style={{
             width: '100%',
             padding: '36px 34px 30px',
@@ -394,6 +395,7 @@ export default function AdminLogin() {
 
       {/* Footer */}
       <div
+        className="login-footer"
         style={{
           position: 'relative',
           zIndex: 3,
@@ -415,7 +417,7 @@ export default function AdminLogin() {
             strokeLinejoin="round"
           />
         </svg>
-        <span style={{ display: 'inline-flex', alignItems: 'center' }}>PHOENIX BUSINESS EXCHANGE <Dot size={16} /> ADMIN PORTAL <Dot size={16} /> ENCRYPTED CHANNEL</span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>PHOENIX BUSINESS EXCHANGE <Dot size={16} /> ADMIN PORTAL <Dot size={16} /> ENCRYPTED CHANNEL</span>
       </div>
 
       <style>{`

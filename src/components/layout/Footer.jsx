@@ -22,12 +22,13 @@ const columns = [
 export default function Footer() {
   return (
     <footer style={{ background: '#fff', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-      <div style={{ margin: 0, padding: '38px 40px' }}>
+      <div style={{ margin: 0, padding: '38px clamp(16px, 5vw, 40px)' }}>
         <div
+          className="user-footer-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: 28,
+            gap: 'clamp(14px, 4vw, 28px)',
             paddingBottom: 24,
             borderBottom: '1px solid rgba(0,0,0,0.08)',
           }}

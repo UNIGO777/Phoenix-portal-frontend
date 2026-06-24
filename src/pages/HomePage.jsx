@@ -85,7 +85,7 @@ export default function HomePage() {
       >
         <div
           style={{
-            padding: '13px 40px',
+            padding: '13px clamp(16px, 5vw, 40px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -107,9 +107,10 @@ export default function HomePage() {
         initial="hidden"
         animate="visible"
         variants={stagger}
-        style={{ padding: '64px 40px 48px' }}
+        style={{ padding: '64px clamp(16px, 5vw, 40px) 48px' }}
       >
         <div
+          className="user-hero-row"
           style={{
             display: 'flex',
             flexWrap: 'wrap',
@@ -133,6 +134,7 @@ export default function HomePage() {
             Marketplace
           </motion.h1>
           <motion.div
+            className="user-hero-sub"
             variants={fadeUp}
             transition={{ duration: 0.7, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
             style={{ textAlign: 'right', maxWidth: 300 }}
@@ -168,10 +170,10 @@ export default function HomePage() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
           variants={stagger}
-          style={{ padding: '0 40px 8px' }}
+          style={{ padding: '0 clamp(16px, 5vw, 40px) 8px' }}
         >
           <div
-            className="mq-row"
+            className="mq-row user-industry-row"
             style={{
               display: 'flex',
               gap: 5,
@@ -189,11 +191,13 @@ export default function HomePage() {
             {industries.map((ind, i) => (
               <motion.div
                 key={ind._id}
+                className="user-industry-item"
                 variants={scaleIn}
                 transition={{ duration: 0.4, delay: i * 0.05 }}
               >
                 <Link
                   to={`/search?industry=${ind._id}`}
+                  className="user-industry-link"
                   style={{
                     flex: '0 0 auto',
                     display: 'flex',
@@ -210,15 +214,16 @@ export default function HomePage() {
                     src={ind.image || industryImages[ind.name] || defaultImg}
                     alt={ind.name}
                     loading="lazy"
+                    className="user-industry-img"
                     style={{
-                      width: 96,
-                      height: 96,
+                      width: 'clamp(64px, 12vw, 96px)',
+                      height: 'clamp(64px, 12vw, 96px)',
                       borderRadius: 20,
                       objectFit: 'cover',
                       display: 'block',
                     }}
                   />
-                  <span style={{ fontSize: 13, textAlign: 'center', lineHeight: 1.2, fontWeight: 500 }}>{ind.name}</span>
+                  <span className="user-industry-name" style={{ fontSize: 13, textAlign: 'center', lineHeight: 1.2, fontWeight: 500 }}>{ind.name}</span>
                 </Link>
               </motion.div>
             ))}
@@ -233,7 +238,7 @@ export default function HomePage() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.15 }}
           variants={stagger}
-          style={{ padding: '32px 40px 8px' }}
+          style={{ padding: '32px clamp(16px, 5vw, 40px) 8px' }}
         >
           <motion.h2
             variants={fadeUp}
@@ -250,6 +255,7 @@ export default function HomePage() {
             <span style={{ color: '#86868b', fontWeight: 600 }}>Verified opportunities, just listed.</span>
           </motion.h2>
           <div
+            className="user-featured-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: featured.length > 1 ? '1.6fr 1fr' : '1fr',
@@ -289,7 +295,7 @@ export default function HomePage() {
                 style={{
                   position: 'relative',
                   zIndex: 2,
-                  padding: '40px 38px',
+                  padding: 'clamp(20px, 4vw, 40px) clamp(18px, 4vw, 38px)',
                   minHeight: 440,
                   display: 'flex',
                   flexDirection: 'column',
@@ -321,7 +327,7 @@ export default function HomePage() {
                 <p style={{ fontSize: 17, lineHeight: 1.45, color: '#d6dae3', margin: 0, maxWidth: 340, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                   {featured[0].description || 'Premium business opportunity.'}
                 </p>
-                <div style={{ marginTop: 'auto', display: 'flex', gap: 34, paddingTop: 28 }}>
+                <div className="user-featured-stats" style={{ marginTop: 'auto', display: 'flex', gap: 'clamp(16px, 4vw, 34px)', paddingTop: 28 }}>
                   <div>
                     <div style={{ fontSize: 13, color: '#aeb6c4' }}>Asking</div>
                     <div style={{ fontSize: 22, fontWeight: 600 }}>{formatPrice(featured[0].askingPrice)}</div>
@@ -380,7 +386,7 @@ export default function HomePage() {
                       style={{
                         position: 'relative',
                         zIndex: 2,
-                        padding: 30,
+                        padding: 'clamp(16px, 4vw, 30px)',
                         display: 'flex',
                         flexDirection: 'column',
                         minHeight: 210,
@@ -443,7 +449,7 @@ export default function HomePage() {
           variants={stagger}
           style={{ padding: '52px 0 8px' }}
         >
-          <div style={{ padding: '0 40px' }}>
+          <div style={{ padding: '0 clamp(16px, 5vw, 40px)' }}>
             <motion.h2
               variants={fadeUp}
               transition={{ duration: 0.6 }}
@@ -460,13 +466,13 @@ export default function HomePage() {
             </motion.h2>
           </div>
           <div
-            className="mq-row"
+            className="mq-row user-featured-row"
             style={{
               display: 'flex',
               gap: 20,
               overflowX: 'auto',
               padding: '10px 0 26px',
-              margin: '0 40px',
+              margin: '0 clamp(16px, 5vw, 40px)',
               scrollSnapType: 'x proximity',
             }}
           >
@@ -551,7 +557,7 @@ export default function HomePage() {
           variants={stagger}
           style={{ padding: '52px 0 8px' }}
         >
-          <div style={{ padding: '0 40px' }}>
+          <div style={{ padding: '0 clamp(16px, 5vw, 40px)' }}>
             <motion.h2
               variants={fadeUp}
               transition={{ duration: 0.6 }}
@@ -568,13 +574,13 @@ export default function HomePage() {
             </motion.h2>
           </div>
           <div
-            className="mq-row"
+            className="mq-row user-featured-row"
             style={{
               display: 'flex',
               gap: 20,
               overflowX: 'auto',
               padding: '10px 0 26px',
-              margin: '0 40px',
+              margin: '0 clamp(16px, 5vw, 40px)',
               scrollSnapType: 'x proximity',
             }}
           >
@@ -657,7 +663,7 @@ export default function HomePage() {
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
         variants={stagger}
-        style={{ padding: '52px 40px 8px' }}
+        style={{ padding: '52px clamp(16px, 5vw, 40px) 8px' }}
       >
         <motion.h2
           variants={fadeUp}
@@ -674,6 +680,7 @@ export default function HomePage() {
           <span style={{ color: '#86868b', fontWeight: 600 }}>More reasons to acquire with us.</span>
         </motion.h2>
         <div
+          className="user-benefits-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(5, 1fr)',
@@ -709,7 +716,7 @@ export default function HomePage() {
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
         variants={stagger}
-        style={{ padding: '52px 40px 8px' }}
+        style={{ padding: '52px clamp(16px, 5vw, 40px) 8px' }}
       >
         <motion.h2
           variants={fadeUp}
@@ -725,7 +732,7 @@ export default function HomePage() {
           Guidance is here.{' '}
           <span style={{ color: '#86868b', fontWeight: 600 }}>Whenever and however you need it.</span>
         </motion.h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+        <div className="user-guidance-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
           {[
             {
               title: 'Browse verified listings.',
@@ -751,7 +758,7 @@ export default function HomePage() {
               style={{
                 borderRadius: 22,
                 background: '#fff',
-                padding: 32,
+                padding: 'clamp(16px, 4vw, 32px)',
                 minHeight: 300,
                 display: 'flex',
                 flexDirection: 'column',
@@ -792,7 +799,7 @@ export default function HomePage() {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.3 }}
-        style={{ padding: '44px 40px 8px' }}
+        style={{ padding: '44px clamp(16px, 5vw, 40px) 8px' }}
       >
         <motion.div
           variants={fadeUp}
@@ -801,7 +808,7 @@ export default function HomePage() {
             borderRadius: 22,
             background: 'linear-gradient(160deg, #1d2330, #10141d)',
             color: '#fff',
-            padding: 'clamp(44px, 6vw, 72px) 32px',
+            padding: 'clamp(44px, 6vw, 72px) clamp(16px, 4vw, 32px)',
             textAlign: 'center',
           }}
         >
@@ -869,7 +876,7 @@ export default function HomePage() {
         whileInView="visible"
         viewport={{ once: true, amount: 0.3 }}
         variants={stagger}
-        style={{ padding: '48px 40px 24px' }}
+        style={{ padding: '48px clamp(16px, 5vw, 40px) 24px' }}
       >
         <motion.h2
           variants={fadeUp}

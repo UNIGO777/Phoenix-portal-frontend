@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { inquiryService } from '../../services/adminApi';
@@ -240,30 +240,41 @@ export default function InquiryList() {
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [selectedInquiry, setSelectedInquiry] = useState(null);
 
-  const fetchInquiries = (p = page) => {
-    setLoading(true);
+  const fetchInquiries = useCallback(() => {
+    const isFirstPage = page === 1;
+    if (isFirstPage) setLoading(true);
+    else setLoadingMore(true);
+
     inquiryService
-      .getAll(p, 20)
+      .getAll(page, 20)
       .then(({ data }) => {
-        setInquiries(data.data);
+        setInquiries((prev) => (isFirstPage ? data.data : [...prev, ...data.data]));
         setPagination(data.pagination);
       })
       .catch((err) => {
         console.error('Failed to fetch inquiries:', err);
       })
-      .finally(() => setLoading(false));
-  };
+      .finally(() => {
+        setLoading(false);
+        setLoadingMore(false);
+      });
+  }, [page]);
 
   useEffect(() => {
-    fetchInquiries(page);
-  }, [page]);
+    fetchInquiries();
+  }, [fetchInquiries]);
+
+  const hasMore = page < (pagination.totalPages || 1);
 
   const handleChangeStatus = async (id, status) => {
     try {
       await inquiryService.changeStatus(id, status);
-      fetchInquiries();
+      setInquiries((prev) =>
+        prev.map((inq) => (inq._id === id ? { ...inq, status } : inq))
+      );
     } catch (err) {
       alert('Failed to update status: ' + (err.response?.data?.message || err.message));
     }
@@ -273,7 +284,7 @@ export default function InquiryList() {
     if (!confirm('Delete this inquiry? This action cannot be undone.')) return;
     try {
       await inquiryService.delete(id);
-      fetchInquiries();
+      setInquiries((prev) => prev.filter((inq) => inq._id !== id));
     } catch (err) {
       alert('Failed to delete inquiry: ' + (err.response?.data?.message || err.message));
     }
@@ -332,7 +343,7 @@ export default function InquiryList() {
                 label: '#',
                 render: (_, __, index) => (
                   <span style={{ fontWeight: 600, color: '#86868b', fontSize: 13 }}>
-                    {((pagination.page || 1) - 1) * (pagination.limit || 20) + index + 1}
+                    {index + 1}
                   </span>
                 ),
               },
@@ -419,6 +430,8 @@ export default function InquiryList() {
             ]}
             data={inquiries}
             loading={loading}
+            loadingMore={loadingMore}
+            hasMore={hasMore}
             pagination={pagination}
             onPageChange={setPage}
             actions={(inquiry) => [

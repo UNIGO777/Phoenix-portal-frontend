@@ -55,7 +55,7 @@ export const countryService = {
 // Featured API
 export const featuredService = {
   getAll: () => api.get('/featured'),
-  updateOrder: (businesses) => api.put('/featured/order', { businesses }),
+  updateOrder: (order) => api.put('/featured/order', { order }),
 };
 
 // Inquiries API
