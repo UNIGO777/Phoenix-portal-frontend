@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5001',
+        target: 'https://api.phxcrossborder.com',
         changeOrigin: true,
       },
     },
