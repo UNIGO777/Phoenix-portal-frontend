@@ -381,6 +381,17 @@ export default function LoginPage() {
                   >
                     {isLoading ? 'AUTHENTICATING...' : 'ENTER PORTAL'}
                   </button>
+
+                  {/* OTP notice */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, marginTop: 14 }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7f93bd" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 2 4 5v6c0 5 3.4 8.6 8 11 4.6-2.4 8-6 8-11V5l-8-3Z" />
+                      <path d="M9 12l2 2 4-4" />
+                    </svg>
+                    <span style={{ fontSize: 11, color: '#7f93bd' }}>
+                      OTP verification will be sent to your email
+                    </span>
+                  </div>
                 </form>
               </>
             )}
