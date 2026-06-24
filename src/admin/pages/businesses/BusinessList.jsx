@@ -39,7 +39,12 @@ export default function BusinessList() {
   const [searchDebounced, setSearchDebounced] = useState('');
 
   // Debounce search input
+  const [initialMount, setInitialMount] = useState(true);
   useEffect(() => {
+    if (initialMount) {
+      setInitialMount(false);
+      return;
+    }
     const timer = setTimeout(() => {
       setSearchDebounced(search);
       setPage(1);
