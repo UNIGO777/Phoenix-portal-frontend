@@ -43,6 +43,11 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password, rememberMe = false) => {
     const { data } = await api.post('/auth/user/login', { email, password, rememberMe });
+    return data; // returns { otpRequired: true, email, rememberMe } — tokens issued after OTP
+  };
+
+  const verifyOtp = async (email, otp, rememberMe = false) => {
+    const { data } = await api.post('/auth/user/verify-otp', { email, otp, rememberMe });
     if (data.success) {
       const userData = data.data.user;
       setUser(userData);
@@ -61,7 +66,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, isAuthenticated: !!user, clearAuth }}>
+    <AuthContext.Provider value={{ user, loading, login, verifyOtp, logout, isAuthenticated: !!user, clearAuth }}>
       {children}
     </AuthContext.Provider>
   );

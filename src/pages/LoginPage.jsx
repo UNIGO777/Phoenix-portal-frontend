@@ -11,27 +11,70 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, verifyOtp } = useAuth();
   const navigate = useNavigate();
 
   // Forgot password states
-  const [view, setView] = useState('login'); // 'login' | 'forgot' | 'forgot-sent'
+  const [view, setView] = useState('login'); // 'login' | 'otp' | 'forgot' | 'forgot-sent'
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotError, setForgotError] = useState('');
+
+  // OTP states
+  const [otpEmail, setOtpEmail] = useState('');
+  const [otpRememberMe, setOtpRememberMe] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
     try {
-      await login(email, password, remember);
-      navigate('/home');
+      const data = await login(email, password, remember);
+      if (data.data?.otpRequired) {
+        setOtpEmail(data.data.email);
+        setOtpRememberMe(data.data.rememberMe || false);
+        setView('otp');
+        setOtp('');
+        setOtpError('');
+      } else {
+        navigate('/home');
+      }
     } catch (err) {
       const msg = err.response?.data?.message || 'Login failed. Please try again.';
       setError(msg);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+    if (!otp.trim()) { setOtpError('Please enter the OTP'); return; }
+    setOtpLoading(true);
+    setOtpError('');
+    try {
+      await verifyOtp(otpEmail, otp.trim(), otpRememberMe);
+      navigate('/home');
+    } catch (err) {
+      setOtpError(err.response?.data?.message || 'Invalid OTP');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setOtpError('');
+    setOtpLoading(true);
+    try {
+      await login(email, password, remember);
+      setOtp('');
+    } catch (err) {
+      setOtpError(err.response?.data?.message || 'Failed to resend OTP');
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -339,6 +382,86 @@ export default function LoginPage() {
                     {isLoading ? 'AUTHENTICATING...' : 'ENTER PORTAL'}
                   </button>
                 </form>
+              </>
+            )}
+
+            {/* ── OTP VIEW ── */}
+            {view === 'otp' && (
+              <>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, cursor: 'pointer', color: '#7fa6ff', fontSize: 13 }}
+                  onClick={() => { setView('login'); setOtpError(''); setOtp(''); }}
+                >
+                  <ChevronLeft size={14} /> Back to login
+                </div>
+
+                <div style={{ textAlign: 'center', marginBottom: 8 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(91,140,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7fa6ff" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 2 4 5v6c0 5 3.4 8.6 8 11 4.6-2.4 8-6 8-11V5l-8-3Z" />
+                      <path d="M9 12l2 2 4-4" />
+                    </svg>
+                  </div>
+                  <div style={{ fontFamily: "'Sora', sans-serif", fontSize: 17, fontWeight: 600, color: '#eef3ff', letterSpacing: '.01em' }}>
+                    Verify Identity
+                  </div>
+                  <div style={{ fontSize: 12, color: '#8ea2c8', marginTop: 6, lineHeight: 1.5 }}>
+                    A 6-digit code has been sent to<br />
+                    <strong style={{ color: '#bcd0f2' }}>{otpEmail}</strong>
+                  </div>
+                </div>
+
+                {otpError && (
+                  <div style={{ background: 'rgba(255,60,60,.12)', border: '1px solid rgba(255,80,80,.3)', borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#ff8a8a' }}>
+                    {otpError}
+                  </div>
+                )}
+
+                <form onSubmit={handleOtpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18, marginTop: 20 }}>
+                  <input
+                    type="text"
+                    placeholder="Enter 6-digit code"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    maxLength={6}
+                    autoFocus
+                    style={{
+                      width: '100%', padding: '16px 14px', borderRadius: 11,
+                      border: '1px solid rgba(150,190,255,.2)', background: 'rgba(6,12,28,.45)',
+                      color: '#7fa6ff', fontSize: 28, fontWeight: 700, letterSpacing: '0.3em',
+                      textAlign: 'center', outline: 'none', boxSizing: 'border-box',
+                      fontFamily: "'Courier New', monospace",
+                    }}
+                    onFocus={(e) => { e.target.style.borderColor = 'rgba(110,170,255,.7)'; e.target.style.boxShadow = '0 0 0 3px rgba(80,140,255,.18)'; }}
+                    onBlur={(e) => { e.target.style.borderColor = 'rgba(150,190,255,.2)'; e.target.style.boxShadow = 'none'; }}
+                  />
+
+                  <button
+                    type="submit"
+                    disabled={otpLoading || otp.length !== 6}
+                    style={{
+                      width: '100%', padding: 14, border: 'none', borderRadius: 12,
+                      background: (otpLoading || otp.length !== 6) ? 'linear-gradient(135deg,#1d4abf,#3a6adf)' : 'linear-gradient(135deg,#2f6bff,#5b8cff 60%,#7fa6ff)',
+                      color: '#fff', fontFamily: "'Sora', sans-serif", fontSize: 14, fontWeight: 600,
+                      letterSpacing: '.04em', cursor: (otpLoading || otp.length !== 6) ? 'not-allowed' : 'pointer',
+                      boxShadow: '0 12px 32px rgba(50,110,255,.4), inset 0 1px 0 rgba(255,255,255,.3)',
+                      opacity: (otpLoading || otp.length !== 6) ? 0.7 : 1,
+                    }}
+                    onMouseEnter={(e) => { if (!otpLoading && otp.length === 6) { e.target.style.filter = 'brightness(1.08)'; } }}
+                    onMouseLeave={(e) => { e.target.style.filter = 'none'; }}
+                  >
+                    {otpLoading ? 'VERIFYING...' : 'VERIFY & ENTER PORTAL'}
+                  </button>
+                </form>
+
+                <div style={{ textAlign: 'center', marginTop: 18 }}>
+                  <span
+                    onClick={handleResendOtp}
+                    style={{ fontSize: 12, color: '#7fa6ff', cursor: 'pointer', textDecoration: 'none' }}
+                  >
+                    Didn't receive the code? Resend
+                  </span>
+                </div>
               </>
             )}
 

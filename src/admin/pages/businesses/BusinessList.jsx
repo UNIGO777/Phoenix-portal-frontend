@@ -83,8 +83,7 @@ export default function BusinessList() {
     if (!confirm(`Delete business "${name}"? This action cannot be undone.`)) return;
     try {
       await businessService.delete(id);
-      setPage(1);
-      setBusinesses([]);
+      setBusinesses((prev) => prev.filter((b) => b._id !== id));
     } catch (err) {
       alert('Failed to delete business: ' + (err.response?.data?.message || err.message));
     }
@@ -224,6 +223,45 @@ export default function BusinessList() {
         <motion.div variants={fadeUp} transition={{ duration: 0.5, delay: 0.1 }}>
           <DataTable
             columns={[
+              {
+                key: 'images',
+                label: 'Image',
+                render: (value, row) => {
+                  const src = value && value.length > 0 ? value[0] : null;
+                  return src ? (
+                    <img
+                      src={src}
+                      alt={row.name}
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: 10,
+                        objectFit: 'cover',
+                        border: '1px solid rgba(0,0,0,0.06)',
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: 10,
+                        background: 'linear-gradient(135deg, #f5f5f7, #e8e8ed)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '1px solid rgba(0,0,0,0.06)',
+                      }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
+                      </svg>
+                    </div>
+                  );
+                },
+              },
               { key: 'name', label: 'Name' },
               {
                 key: 'industry',

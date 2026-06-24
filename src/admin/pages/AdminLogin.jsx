@@ -5,11 +5,18 @@ import { useAdminAuth } from '../context/AdminAuthContext';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const { login } = useAdminAuth();
+  const { login, verifyOtp } = useAdminAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // OTP states
+  const [view, setView] = useState('login'); // 'login' | 'otp'
+  const [otpEmail, setOtpEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,12 +24,49 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      await login(email, password);
-      navigate('/admin/dashboard');
+      const data = await login(email, password);
+      if (data.data?.otpRequired) {
+        setOtpEmail(data.data.email);
+        setView('otp');
+        setOtp('');
+        setOtpError('');
+      } else {
+        navigate('/admin/dashboard');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to login');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+    if (!otp.trim()) { setOtpError('Please enter the OTP'); return; }
+    setOtpLoading(true);
+    setOtpError('');
+
+    try {
+      await verifyOtp(otpEmail, otp.trim());
+      navigate('/admin/dashboard');
+    } catch (err) {
+      setOtpError(err.response?.data?.message || 'Invalid OTP');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setOtpError('');
+    setOtpLoading(true);
+    try {
+      await login(email, password);
+      setOtpError('');
+      setOtp('');
+    } catch (err) {
+      setOtpError(err.response?.data?.message || 'Failed to resend OTP');
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -181,214 +225,219 @@ export default function AdminLogin() {
           />
 
           <div style={{ position: 'relative' }}>
-            {/* Title with shield icon */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 2 4 5v6c0 5 3.4 8.6 8 11 4.6-2.4 8-6 8-11V5l-8-3Z"
-                  stroke="#7fa6ff"
-                  strokeWidth="1.6"
-                  strokeLinejoin="round"
-                />
-                <path d="M9 12l2 2 4-4" stroke="#7fa6ff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <div
-                style={{
-                  fontFamily: "'Sora', sans-serif",
-                  fontSize: 17,
-                  fontWeight: 600,
-                  color: '#eef3ff',
-                  letterSpacing: '.01em',
-                }}
-              >
-                Command Center
-              </div>
-            </div>
-            <div style={{ fontSize: 12, color: '#8ea2c8', marginBottom: 24 }}>
-              Restricted administrative access
-            </div>
+            {/* ── LOGIN VIEW ── */}
+            {view === 'login' && (
+              <>
+                {/* Title with shield icon */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 2 4 5v6c0 5 3.4 8.6 8 11 4.6-2.4 8-6 8-11V5l-8-3Z"
+                      stroke="#7fa6ff"
+                      strokeWidth="1.6"
+                      strokeLinejoin="round"
+                    />
+                    <path d="M9 12l2 2 4-4" stroke="#7fa6ff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <div
+                    style={{
+                      fontFamily: "'Sora', sans-serif",
+                      fontSize: 17,
+                      fontWeight: 600,
+                      color: '#eef3ff',
+                      letterSpacing: '.01em',
+                    }}
+                  >
+                    Command Center
+                  </div>
+                </div>
+                <div style={{ fontSize: 12, color: '#8ea2c8', marginBottom: 24 }}>
+                  Restricted administrative access
+                </div>
 
-            {error && (
-              <div
-                style={{
-                  background: 'rgba(255,60,60,.12)',
-                  border: '1px solid rgba(255,80,80,.3)',
-                  borderRadius: 10,
-                  padding: '10px 14px',
-                  marginBottom: 16,
-                  fontSize: 13,
-                  color: '#ff8a8a',
-                }}
-              >
-                {error}
-              </div>
+                {error && (
+                  <div
+                    style={{
+                      background: 'rgba(255,60,60,.12)',
+                      border: '1px solid rgba(255,80,80,.3)',
+                      borderRadius: 10,
+                      padding: '10px 14px',
+                      marginBottom: 16,
+                      fontSize: 13,
+                      color: '#ff8a8a',
+                    }}
+                  >
+                    {error}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                  {/* Email */}
+                  <div style={{ position: 'relative' }}>
+                    <svg
+                      width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)' }}
+                    >
+                      <circle cx="12" cy="8" r="4" stroke="#7f93bd" strokeWidth="1.7" />
+                      <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="#7f93bd" strokeWidth="1.7" />
+                    </svg>
+                    <input
+                      type="email"
+                      placeholder="Admin email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      style={{
+                        width: '100%', padding: '13px 14px 13px 40px', borderRadius: 11,
+                        border: '1px solid rgba(150,190,255,.2)', background: 'rgba(6,12,28,.45)',
+                        color: '#eef3ff', fontSize: 14, outline: 'none', boxSizing: 'border-box',
+                      }}
+                      onFocus={(e) => { e.target.style.borderColor = 'rgba(110,170,255,.7)'; e.target.style.boxShadow = '0 0 0 3px rgba(80,140,255,.18)'; }}
+                      onBlur={(e) => { e.target.style.borderColor = 'rgba(150,190,255,.2)'; e.target.style.boxShadow = 'none'; }}
+                    />
+                  </div>
+
+                  {/* Password */}
+                  <div style={{ position: 'relative' }}>
+                    <svg
+                      width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)' }}
+                    >
+                      <rect x="5" y="10" width="14" height="10" rx="2" stroke="#7f93bd" strokeWidth="1.7" />
+                      <path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#7f93bd" strokeWidth="1.7" />
+                    </svg>
+                    <input
+                      type="password"
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      style={{
+                        width: '100%', padding: '13px 14px 13px 40px', borderRadius: 11,
+                        border: '1px solid rgba(150,190,255,.2)', background: 'rgba(6,12,28,.45)',
+                        color: '#eef3ff', fontSize: 14, outline: 'none', boxSizing: 'border-box',
+                      }}
+                      onFocus={(e) => { e.target.style.borderColor = 'rgba(110,170,255,.7)'; e.target.style.boxShadow = '0 0 0 3px rgba(80,140,255,.18)'; }}
+                      onBlur={(e) => { e.target.style.borderColor = 'rgba(150,190,255,.2)'; e.target.style.boxShadow = 'none'; }}
+                    />
+                  </div>
+
+                  {/* Submit */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    style={{
+                      width: '100%', padding: 14, border: 'none', borderRadius: 12,
+                      background: loading ? 'linear-gradient(135deg,#1d4abf,#3a6adf)' : 'linear-gradient(135deg,#2f6bff,#5b8cff 60%,#7fa6ff)',
+                      color: '#fff', fontFamily: "'Sora', sans-serif", fontSize: 14, fontWeight: 600,
+                      letterSpacing: '.04em', cursor: loading ? 'not-allowed' : 'pointer',
+                      boxShadow: '0 12px 32px rgba(50,110,255,.4), inset 0 1px 0 rgba(255,255,255,.3)',
+                      opacity: loading ? 0.7 : 1, marginTop: 4,
+                    }}
+                    onMouseEnter={(e) => { if (!loading) { e.target.style.filter = 'brightness(1.08)'; e.target.style.boxShadow = '0 14px 40px rgba(60,130,255,.55), inset 0 1px 0 rgba(255,255,255,.4)'; } }}
+                    onMouseLeave={(e) => { e.target.style.filter = 'none'; e.target.style.boxShadow = '0 12px 32px rgba(50,110,255,.4), inset 0 1px 0 rgba(255,255,255,.3)'; }}
+                  >
+                    {loading ? 'AUTHENTICATING...' : 'ACCESS COMMAND CENTER'}
+                  </button>
+                </form>
+
+                {/* Admin badge */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 22 }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ff5a3c', animation: 'adminPulse 1.8s ease-in-out infinite', display: 'inline-block' }} />
+                  <span style={{ fontSize: 10, letterSpacing: '.2em', color: '#ffb39c', fontWeight: 600 }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center' }}>ADMIN ACCESS <Dot size={16} /> RESTRICTED</span>
+                  </span>
+                </div>
+
+                {/* Demo credentials */}
+                <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid rgba(170,200,255,.14)', textAlign: 'center' }}>
+                  <span style={{ fontSize: 11, color: '#6b7fa0' }}>
+                    Demo: naman13399@gmail.com / Naman@13399
+                  </span>
+                </div>
+              </>
             )}
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-              {/* Email */}
-              <div style={{ position: 'relative' }}>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)' }}
+            {/* ── OTP VIEW ── */}
+            {view === 'otp' && (
+              <>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, cursor: 'pointer', color: '#7fa6ff', fontSize: 13 }}
+                  onClick={() => { setView('login'); setOtpError(''); setOtp(''); }}
                 >
-                  <circle cx="12" cy="8" r="4" stroke="#7f93bd" strokeWidth="1.7" />
-                  <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="#7f93bd" strokeWidth="1.7" />
-                </svg>
-                <input
-                  type="email"
-                  placeholder="Admin email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '13px 14px 13px 40px',
-                    borderRadius: 11,
-                    border: '1px solid rgba(150,190,255,.2)',
-                    background: 'rgba(6,12,28,.45)',
-                    color: '#eef3ff',
-                    fontSize: 14,
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = 'rgba(110,170,255,.7)';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(80,140,255,.18)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = 'rgba(150,190,255,.2)';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                />
-              </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                  Back to login
+                </div>
 
-              {/* Password */}
-              <div style={{ position: 'relative' }}>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)' }}
-                >
-                  <rect x="5" y="10" width="14" height="10" rx="2" stroke="#7f93bd" strokeWidth="1.7" />
-                  <path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#7f93bd" strokeWidth="1.7" />
-                </svg>
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '13px 14px 13px 40px',
-                    borderRadius: 11,
-                    border: '1px solid rgba(150,190,255,.2)',
-                    background: 'rgba(6,12,28,.45)',
-                    color: '#eef3ff',
-                    fontSize: 14,
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = 'rgba(110,170,255,.7)';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(80,140,255,.18)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = 'rgba(150,190,255,.2)';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                />
-              </div>
+                <div style={{ textAlign: 'center', marginBottom: 8 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(91,140,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7fa6ff" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 2 4 5v6c0 5 3.4 8.6 8 11 4.6-2.4 8-6 8-11V5l-8-3Z" />
+                      <path d="M9 12l2 2 4-4" />
+                    </svg>
+                  </div>
+                  <div style={{ fontFamily: "'Sora', sans-serif", fontSize: 17, fontWeight: 600, color: '#eef3ff', letterSpacing: '.01em' }}>
+                    Verify Identity
+                  </div>
+                  <div style={{ fontSize: 12, color: '#8ea2c8', marginTop: 6, lineHeight: 1.5 }}>
+                    A 6-digit code has been sent to<br />
+                    <strong style={{ color: '#bcd0f2' }}>{otpEmail}</strong>
+                  </div>
+                </div>
 
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading}
-                style={{
-                  width: '100%',
-                  padding: 14,
-                  border: 'none',
-                  borderRadius: 12,
-                  background: loading
-                    ? 'linear-gradient(135deg,#1d4abf,#3a6adf)'
-                    : 'linear-gradient(135deg,#2f6bff,#5b8cff 60%,#7fa6ff)',
-                  color: '#fff',
-                  fontFamily: "'Sora', sans-serif",
-                  fontSize: 14,
-                  fontWeight: 600,
-                  letterSpacing: '.04em',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  boxShadow: '0 12px 32px rgba(50,110,255,.4), inset 0 1px 0 rgba(255,255,255,.3)',
-                  opacity: loading ? 0.7 : 1,
-                  marginTop: 4,
-                }}
-                onMouseEnter={(e) => {
-                  if (!loading) {
-                    e.target.style.filter = 'brightness(1.08)';
-                    e.target.style.boxShadow =
-                      '0 14px 40px rgba(60,130,255,.55), inset 0 1px 0 rgba(255,255,255,.4)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.filter = 'none';
-                  e.target.style.boxShadow =
-                    '0 12px 32px rgba(50,110,255,.4), inset 0 1px 0 rgba(255,255,255,.3)';
-                }}
-              >
-                {loading ? 'AUTHENTICATING...' : 'ACCESS COMMAND CENTER'}
-              </button>
-            </form>
+                {otpError && (
+                  <div style={{ background: 'rgba(255,60,60,.12)', border: '1px solid rgba(255,80,80,.3)', borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#ff8a8a' }}>
+                    {otpError}
+                  </div>
+                )}
 
-            {/* Admin badge */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-                marginTop: 22,
-              }}
-            >
-              <span
-                style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: '50%',
-                  background: '#ff5a3c',
-                  animation: 'adminPulse 1.8s ease-in-out infinite',
-                  display: 'inline-block',
-                }}
-              />
-              <span
-                style={{
-                  fontSize: 10,
-                  letterSpacing: '.2em',
-                  color: '#ffb39c',
-                  fontWeight: 600,
-                }}
-              >
-                <span style={{ display: 'inline-flex', alignItems: 'center' }}>ADMIN ACCESS <Dot size={16} /> RESTRICTED</span>
-              </span>
-            </div>
+                <form onSubmit={handleOtpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18, marginTop: 20 }}>
+                  <input
+                    type="text"
+                    placeholder="Enter 6-digit code"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    maxLength={6}
+                    autoFocus
+                    style={{
+                      width: '100%', padding: '16px 14px', borderRadius: 11,
+                      border: '1px solid rgba(150,190,255,.2)', background: 'rgba(6,12,28,.45)',
+                      color: '#7fa6ff', fontSize: 28, fontWeight: 700, letterSpacing: '0.3em',
+                      textAlign: 'center', outline: 'none', boxSizing: 'border-box',
+                      fontFamily: "'Courier New', monospace",
+                    }}
+                    onFocus={(e) => { e.target.style.borderColor = 'rgba(110,170,255,.7)'; e.target.style.boxShadow = '0 0 0 3px rgba(80,140,255,.18)'; }}
+                    onBlur={(e) => { e.target.style.borderColor = 'rgba(150,190,255,.2)'; e.target.style.boxShadow = 'none'; }}
+                  />
 
-            {/* Demo credentials */}
-            <div
-              style={{
-                marginTop: 14,
-                paddingTop: 14,
-                borderTop: '1px solid rgba(170,200,255,.14)',
-                textAlign: 'center',
-              }}
-            >
-              <span style={{ fontSize: 11, color: '#6b7fa0' }}>
-                Demo: naman13399@gmail.com / Naman@13399
-              </span>
-            </div>
+                  <button
+                    type="submit"
+                    disabled={otpLoading || otp.length !== 6}
+                    style={{
+                      width: '100%', padding: 14, border: 'none', borderRadius: 12,
+                      background: (otpLoading || otp.length !== 6) ? 'linear-gradient(135deg,#1d4abf,#3a6adf)' : 'linear-gradient(135deg,#2f6bff,#5b8cff 60%,#7fa6ff)',
+                      color: '#fff', fontFamily: "'Sora', sans-serif", fontSize: 14, fontWeight: 600,
+                      letterSpacing: '.04em', cursor: (otpLoading || otp.length !== 6) ? 'not-allowed' : 'pointer',
+                      boxShadow: '0 12px 32px rgba(50,110,255,.4), inset 0 1px 0 rgba(255,255,255,.3)',
+                      opacity: (otpLoading || otp.length !== 6) ? 0.7 : 1,
+                    }}
+                    onMouseEnter={(e) => { if (!otpLoading && otp.length === 6) { e.target.style.filter = 'brightness(1.08)'; } }}
+                    onMouseLeave={(e) => { e.target.style.filter = 'none'; }}
+                  >
+                    {otpLoading ? 'VERIFYING...' : 'VERIFY & LOGIN'}
+                  </button>
+                </form>
+
+                <div style={{ textAlign: 'center', marginTop: 18 }}>
+                  <span
+                    onClick={handleResendOtp}
+                    style={{ fontSize: 12, color: '#7fa6ff', cursor: 'pointer', textDecoration: 'none' }}
+                  >
+                    Didn't receive the code? Resend
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

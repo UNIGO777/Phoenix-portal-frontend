@@ -21,13 +21,31 @@ export default function UserList() {
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [search, setSearch] = useState('');
+  const [searchDebounced, setSearchDebounced] = useState('');
+
+  // Debounce search input
+  const [initialMount, setInitialMount] = useState(true);
+  useEffect(() => {
+    if (initialMount) {
+      setInitialMount(false);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setSearchDebounced(search);
+      setPage(1);
+      setUsers([]);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const fetchUsers = useCallback(() => {
     const isFirstPage = page === 1;
     if (isFirstPage) setLoading(true);
     else setLoadingMore(true);
 
-    userService.getAll(page, 20)
+    const filters = searchDebounced ? { search: searchDebounced } : {};
+    userService.getAll(page, 20, filters)
       .then(({ data }) => {
         setUsers((prev) => (isFirstPage ? data.data : [...prev, ...data.data]));
         setPagination(data.pagination);
@@ -39,7 +57,7 @@ export default function UserList() {
         setLoading(false);
         setLoadingMore(false);
       });
-  }, [page]);
+  }, [page, searchDebounced]);
 
   useEffect(() => {
     fetchUsers();
@@ -51,8 +69,7 @@ export default function UserList() {
     if (!confirm(`Delete user "${fullName}"?`)) return;
     try {
       await userService.delete(id);
-      setPage(1);
-      setUsers([]);
+      setUsers((prev) => prev.filter((u) => u._id !== id));
     } catch (err) {
       alert('Failed to delete user: ' + err.response?.data?.message);
     }
@@ -136,6 +153,46 @@ export default function UserList() {
             </svg>
             Create User
           </button>
+        </motion.div>
+
+        {/* Search bar */}
+        <motion.div variants={fadeUp} transition={{ duration: 0.5, delay: 0.05 }} style={{ marginBottom: 20 }}>
+          <div className="admin-search-wrap" style={{ position: 'relative', maxWidth: 360 }}>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#86868b"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }}
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search users by name or email..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 14px 10px 40px',
+                border: '1px solid rgba(0,0,0,0.1)',
+                borderRadius: 12,
+                fontSize: 14,
+                color: '#1d1d1f',
+                background: '#fff',
+                outline: 'none',
+                transition: 'border-color 0.2s',
+                boxSizing: 'border-box',
+              }}
+              onFocus={(e) => { e.target.style.borderColor = '#0066cc'; }}
+              onBlur={(e) => { e.target.style.borderColor = 'rgba(0,0,0,0.1)'; }}
+            />
+          </div>
         </motion.div>
 
         <motion.div variants={fadeUp} transition={{ duration: 0.5, delay: 0.1 }}>

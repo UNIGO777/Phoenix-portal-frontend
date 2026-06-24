@@ -652,6 +652,9 @@ input::placeholder {
 
   /* Page headers */
   .admin-page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
     margin-bottom: 20px !important;
   }
 
@@ -663,6 +666,8 @@ input::placeholder {
   .admin-header-btn {
     padding: 8px 16px !important;
     font-size: 13px !important;
+    width: 100% !important;
+    justify-content: center !important;
   }
 
   /* Search bar */

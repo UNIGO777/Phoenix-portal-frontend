@@ -42,6 +42,11 @@ export function AdminAuthProvider({ children }) {
 
   const login = async (email, password) => {
     const { data } = await api.post('/auth/admin/login', { email, password });
+    return data; // returns { otpRequired: true, email } — tokens issued after OTP
+  };
+
+  const verifyOtp = async (email, otp) => {
+    const { data } = await api.post('/auth/admin/verify-otp', { email, otp });
     if (data.success) {
       const adminData = data.data.admin;
       setAdmin(adminData);
@@ -60,7 +65,7 @@ export function AdminAuthProvider({ children }) {
   };
 
   return (
-    <AdminAuthContext.Provider value={{ admin, loading, login, logout, isAuthenticated: !!admin, clearAuth }}>
+    <AdminAuthContext.Provider value={{ admin, loading, login, verifyOtp, logout, isAuthenticated: !!admin, clearAuth }}>
       {children}
     </AdminAuthContext.Provider>
   );
