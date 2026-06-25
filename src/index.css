@@ -171,6 +171,15 @@ input::placeholder {
     grid-template-rows: none !important;
     grid-template-columns: 1fr 1fr !important;
   }
+
+  /* HomePage: new market cards stack image below text */
+  .new-market-card {
+    grid-template-columns: 1fr !important;
+    min-height: auto !important;
+  }
+  .new-market-card > div:last-child {
+    min-height: 260px !important;
+  }
 }
 
 /* ── Search browse page: ≤768px — left-align, smaller text ── */
@@ -472,6 +481,11 @@ input::placeholder {
   /* HomePage: featured stats row smaller text */
   .user-featured-grid .user-featured-stats > div > div:last-child {
     font-size: 18px !important;
+  }
+
+  /* HomePage: new market cards smaller on mobile */
+  .new-market-card > div:last-child {
+    min-height: 200px !important;
   }
 
   /* Similar/featured cards smaller */

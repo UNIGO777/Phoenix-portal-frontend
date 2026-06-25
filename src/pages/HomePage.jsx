@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Lock, FolderLock, Headset, Landmark, ChevronRight } from 'lucide-react';
+import { ShieldCheck, Lock, FolderLock, Headset, Landmark, ChevronRight, ArrowRight } from 'lucide-react';
 import api from '../services/api';
 import Layout from '../components/layout/Layout';
 import Loader from '../components/Loader';
@@ -254,188 +254,131 @@ export default function HomePage() {
             New on the market.{' '}
             <span style={{ color: '#86868b', fontWeight: 600 }}>Verified opportunities, just listed.</span>
           </motion.h2>
-          <div
-            className="user-featured-grid"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: featured.length > 1 ? '1.6fr 1fr' : '1fr',
-              gap: 20,
-            }}
-          >
-            {/* Main featured */}
-            <motion.article
-              variants={scaleIn}
-              transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-              whileHover={{ scale: 1.008 }}
-              onClick={() => navigate(`/listing/${featured[0]._id}`)}
-              style={{
-                position: 'relative',
-                overflow: 'hidden',
-                borderRadius: 22,
-                background: '#10141d',
-                color: '#fff',
-                minHeight: 440,
-                cursor: 'pointer',
-              }}
-            >
-              <img
-                src={featured[0].images?.[0] || defaultImg}
-                alt=""
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background:
-                    'linear-gradient(180deg,rgba(16,20,29,0.35) 0%,rgba(16,20,29,0.55) 55%,rgba(16,20,29,0.92) 100%)',
-                }}
-              />
-              <div
-                style={{
-                  position: 'relative',
-                  zIndex: 2,
-                  padding: 'clamp(20px, 4vw, 40px) clamp(18px, 4vw, 38px)',
-                  minHeight: 440,
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    letterSpacing: '0.06em',
-                    textTransform: 'uppercase',
-                    color: '#9fc0ff',
-                    marginBottom: 14,
-                  }}
-                >
-                  Featured &middot; {featured[0].industry?.name || 'Business'}
-                </div>
-                <h3
-                  style={{
-                    fontSize: 'clamp(28px, 3.4vw, 36px)',
-                    fontWeight: 600,
-                    letterSpacing: '-0.01em',
-                    lineHeight: 1.08,
-                    margin: '0 0 10px',
-                  }}
-                >
-                  {featured[0].name}
-                </h3>
-                <p style={{ fontSize: 17, lineHeight: 1.45, color: '#d6dae3', margin: 0, maxWidth: 340, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {featured[0].description || 'Premium business opportunity.'}
-                </p>
-                <div className="user-featured-stats" style={{ marginTop: 'auto', display: 'flex', gap: 'clamp(16px, 4vw, 34px)', paddingTop: 28 }}>
-                  <div>
-                    <div style={{ fontSize: 13, color: '#aeb6c4' }}>Asking</div>
-                    <div style={{ fontSize: 22, fontWeight: 600 }}>{formatPrice(featured[0].askingPrice)}</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 13, color: '#aeb6c4' }}>Employees</div>
-                    <div style={{ fontSize: 22, fontWeight: 600 }}>{featured[0].numEmployees || 'N/A'}</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 13, color: '#aeb6c4' }}>Est.</div>
-                    <div style={{ fontSize: 22, fontWeight: 600 }}>{featured[0].yearEstablished || 'N/A'}</div>
-                  </div>
-                </div>
-              </div>
-            </motion.article>
-
-            {/* Side cards */}
-            {featured.length > 1 && (
-              <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 20 }}>
-                {featured.slice(1, 3).map((biz, i) => (
-                  <motion.article
-                    key={biz._id}
-                    variants={scaleIn}
-                    transition={{ duration: 0.5, delay: 0.15 + i * 0.1 }}
-                    whileHover={{ scale: 1.015 }}
-                    onClick={() => navigate(`/listing/${biz._id}`)}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 54 }}>
+            {featured.slice(0, 3).map((biz, i) => {
+              const imageLeft = i % 2 === 1;
+              const textContent = (
+                <div style={{ padding: 'clamp(24px, 4vw, 44px)', display: 'flex', flexDirection: 'column' }}>
+                  <div
                     style={{
-                      position: 'relative',
-                      overflow: 'hidden',
-                      borderRadius: 22,
-                      background: '#fff',
-                      minHeight: 210,
-                      cursor: 'pointer',
+                      fontSize: 12,
+                      fontWeight: 700,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: '#0066cc',
+                      marginBottom: 12,
                     }}
                   >
-                    <img
-                      src={biz.images?.[0] || defaultImg}
-                      alt=""
-                      style={{
-                        position: 'absolute',
-                        inset: 0,
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: 'absolute',
-                        inset: 0,
-                        background:
-                          'linear-gradient(180deg,rgba(255,255,255,0.95) 0%,rgba(255,255,255,0.82) 50%,rgba(255,255,255,0.6) 100%)',
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: 'relative',
-                        zIndex: 2,
-                        padding: 'clamp(16px, 4vw, 30px)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        minHeight: 210,
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 600,
-                          letterSpacing: '0.06em',
-                          textTransform: 'uppercase',
-                          color: '#0066cc',
-                          marginBottom: 10,
-                        }}
-                      >
-                        {biz.industry?.name || 'Business'}
-                      </div>
-                      <h3
-                        style={{
-                          fontSize: 24,
-                          fontWeight: 600,
-                          letterSpacing: '-0.01em',
-                          lineHeight: 1.1,
-                          margin: '0 0 6px',
-                          color: '#1d1d1f',
-                        }}
-                      >
-                        {biz.name}
-                      </h3>
-                      <p style={{ fontSize: 15, color: '#6e6e73', margin: 0, lineHeight: 1.4 }}>
-                        {biz.city ? `${biz.city}, ` : ''}
-                        {biz.country?.name || ''}
-                      </p>
-                      <div
-                        style={{
-                          marginTop: 'auto',
-                          paddingTop: 18,
-                          fontSize: 15,
-                          color: '#1d1d1f',
-                        }}
-                      >
-                        Asking <strong>{formatPrice(biz.askingPrice)}</strong>
-                        {biz.numEmployees ? ` \u00B7 ${biz.numEmployees} employees` : ''}
-                      </div>
-                    </div>
-                  </motion.article>
-                ))}
-              </div>
-            )}
+                    {i === 0 ? 'Featured' : ''}{i === 0 && biz.industry?.name ? ' · ' : ''}{biz.industry?.name || 'Business'}
+                  </div>
+                  <h3
+                    style={{
+                      fontSize: 'clamp(26px, 3vw, 36px)',
+                      fontWeight: 700,
+                      letterSpacing: '-0.01em',
+                      lineHeight: 1.1,
+                      margin: '0 0 6px',
+                      color: '#1d1d1f',
+                    }}
+                  >
+                    <span style={{ color: '#0066cc' }}>{biz.name.split(' ')[0]}</span>{' '}
+                    {biz.name.split(' ').slice(1).join(' ')}
+                  </h3>
+                  {biz.city && (
+                    <p style={{ fontSize: 14, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#1d1d1f', margin: '4px 0 0' }}>
+                      {biz.city}{biz.country?.name ? `, ${biz.country.name}` : ''}
+                    </p>
+                  )}
+
+                  <div style={{ width: '100%', height: 2, background: '#0066cc', margin: '18px 0 20px', opacity: 0.7 }} />
+
+                  <ul style={{ listStyle: 'disc', paddingLeft: 20, margin: 0, display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+                    {biz.description && (
+                      <li style={{ fontSize: 15, lineHeight: 1.5, color: '#333' }}>
+                        {biz.description.length > 120 ? biz.description.slice(0, 120) + '...' : biz.description}
+                      </li>
+                    )}
+                    {biz.yearEstablished && (
+                      <li style={{ fontSize: 15, lineHeight: 1.5, color: '#333' }}>
+                        <strong>{new Date().getFullYear() - biz.yearEstablished} Years</strong> + in Operation (Est. {biz.yearEstablished})
+                      </li>
+                    )}
+                    {biz.numEmployees && (
+                      <li style={{ fontSize: 15, lineHeight: 1.5, color: '#333' }}>
+                        <strong>{biz.numEmployees} Employees</strong> + in Company
+                      </li>
+                    )}
+                    <li style={{ fontSize: 15, lineHeight: 1.5, color: '#333' }}>
+                      <strong>{formatPrice(biz.askingPrice)}</strong> + Asking Price
+                    </li>
+                    {biz.grossRevenue && (
+                      <li style={{ fontSize: 15, lineHeight: 1.5, color: '#333' }}>
+                        <strong>{formatPrice(biz.grossRevenue)}</strong> + Gross Revenue
+                      </li>
+                    )}
+                  </ul>
+
+                  <div style={{ width: '100%', height: 1, background: '#ddd', margin: '20px 0 18px' }} />
+
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      background: '#1d1d1f',
+                      color: '#fff',
+                      padding: '12px 24px',
+                      borderRadius: 8,
+                      fontSize: 14,
+                      fontWeight: 600,
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                      alignSelf: 'flex-start',
+                    }}
+                  >
+                    View Details
+                    <ArrowRight size={16} />
+                  </div>
+                </div>
+              );
+              const imageContent = (
+                <div style={{ position: 'relative', minHeight: 380 }}>
+                  <img
+                    src={biz.images?.[0] || defaultImg}
+                    alt={biz.name}
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                    }}
+                  />
+                </div>
+              );
+              return (
+                <motion.article
+                  key={biz._id}
+                  variants={scaleIn}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  whileHover={{ scale: 1.005 }}
+                  onClick={() => navigate(`/listing/${biz._id}`)}
+                  className="new-market-card"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1.2fr 1fr',
+                    background: '#f5f5f7',
+                    borderRadius: 18,
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    minHeight: 380,
+                  }}
+                >
+                  {imageLeft ? imageContent : textContent}
+                  {imageLeft ? textContent : imageContent}
+                </motion.article>
+              );
+            })}
           </div>
         </motion.section>
       )}
