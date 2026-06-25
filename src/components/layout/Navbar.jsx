@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Diamond, Search, User, ChevronRight, Menu, X } from 'lucide-react';
+import { Search, User, ChevronRight, Menu, X } from 'lucide-react';
+import LogoImg from '../../assets/Logo.png';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 
@@ -164,8 +165,7 @@ export default function Navbar() {
               flexShrink: 0,
             }}
           >
-            <Diamond size={13} color="#1d1d1f" fill="#1d1d1f" />
-            <span className="user-brand-text">PHOENIX BUSINESS EXCHANGE</span>
+            <img src={LogoImg} alt="Phoenix Business Advisory" style={{ height: 28, objectFit: 'contain' }} />
           </Link>
 
           {/* Desktop nav items */}

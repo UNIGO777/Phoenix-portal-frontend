@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Copyright } from 'lucide-react';
+import LogoImg from '../../assets/Logo.png';
 
 const columns = [
   {
@@ -23,6 +24,9 @@ export default function Footer() {
   return (
     <footer style={{ background: '#fff', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
       <div style={{ margin: 0, padding: '38px clamp(16px, 5vw, 40px)' }}>
+        <div style={{ marginBottom: 24 }}>
+          <img src={LogoImg} alt="Phoenix Business Advisory" style={{ height: 36, objectFit: 'contain' }} />
+        </div>
         <div
           className="user-footer-grid"
           style={{

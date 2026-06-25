@@ -258,7 +258,7 @@ export default function HomePage() {
             {featured.slice(0, 3).map((biz, i) => {
               const imageLeft = i % 2 === 1;
               const textContent = (
-                <div style={{ padding: 'clamp(24px, 4vw, 44px)', display: 'flex', flexDirection: 'column' }}>
+                <div className="new-market-text" style={{ padding: 'clamp(18px, 3vw, 32px)', display: 'flex', flexDirection: 'column' }}>
                   <div
                     style={{
                       fontSize: 12,
@@ -266,18 +266,18 @@ export default function HomePage() {
                       letterSpacing: '0.08em',
                       textTransform: 'uppercase',
                       color: '#0066cc',
-                      marginBottom: 12,
+                      marginBottom: 6,
                     }}
                   >
                     {i === 0 ? 'Featured' : ''}{i === 0 && biz.industry?.name ? ' · ' : ''}{biz.industry?.name || 'Business'}
                   </div>
                   <h3
                     style={{
-                      fontSize: 'clamp(26px, 3vw, 36px)',
+                      fontSize: 'clamp(22px, 2.6vw, 32px)',
                       fontWeight: 700,
                       letterSpacing: '-0.01em',
                       lineHeight: 1.1,
-                      margin: '0 0 6px',
+                      margin: '0 0 4px',
                       color: '#1d1d1f',
                     }}
                   >
@@ -285,51 +285,51 @@ export default function HomePage() {
                     {biz.name.split(' ').slice(1).join(' ')}
                   </h3>
                   {biz.city && (
-                    <p style={{ fontSize: 14, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#1d1d1f', margin: '4px 0 0' }}>
+                    <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#1d1d1f', margin: '2px 0 0' }}>
                       {biz.city}{biz.country?.name ? `, ${biz.country.name}` : ''}
                     </p>
                   )}
 
-                  <div style={{ width: '100%', height: 2, background: '#0066cc', margin: '18px 0 20px', opacity: 0.7 }} />
+                  <div style={{ width: '100%', height: 2, background: '#0066cc', margin: '12px 0 12px', opacity: 0.7 }} />
 
-                  <ul style={{ listStyle: 'disc', paddingLeft: 20, margin: 0, display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+                  <ul style={{ listStyle: 'disc', paddingLeft: 18, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
                     {biz.description && (
-                      <li style={{ fontSize: 15, lineHeight: 1.5, color: '#333' }}>
+                      <li style={{ fontSize: 14, lineHeight: 1.4, color: '#333' }}>
                         {biz.description.length > 120 ? biz.description.slice(0, 120) + '...' : biz.description}
                       </li>
                     )}
                     {biz.yearEstablished && (
-                      <li style={{ fontSize: 15, lineHeight: 1.5, color: '#333' }}>
+                      <li style={{ fontSize: 14, lineHeight: 1.4, color: '#333' }}>
                         <strong>{new Date().getFullYear() - biz.yearEstablished} Years</strong> + in Operation (Est. {biz.yearEstablished})
                       </li>
                     )}
                     {biz.numEmployees && (
-                      <li style={{ fontSize: 15, lineHeight: 1.5, color: '#333' }}>
+                      <li style={{ fontSize: 14, lineHeight: 1.4, color: '#333' }}>
                         <strong>{biz.numEmployees} Employees</strong> + in Company
                       </li>
                     )}
-                    <li style={{ fontSize: 15, lineHeight: 1.5, color: '#333' }}>
+                    <li style={{ fontSize: 14, lineHeight: 1.4, color: '#333' }}>
                       <strong>{formatPrice(biz.askingPrice)}</strong> + Asking Price
                     </li>
                     {biz.grossRevenue && (
-                      <li style={{ fontSize: 15, lineHeight: 1.5, color: '#333' }}>
+                      <li style={{ fontSize: 14, lineHeight: 1.4, color: '#333' }}>
                         <strong>{formatPrice(biz.grossRevenue)}</strong> + Gross Revenue
                       </li>
                     )}
                   </ul>
 
-                  <div style={{ width: '100%', height: 1, background: '#ddd', margin: '20px 0 18px' }} />
+                  <div style={{ width: '100%', height: 1, background: '#ddd', margin: '12px 0 10px' }} />
 
                   <div
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: 10,
+                      gap: 8,
                       background: '#1d1d1f',
                       color: '#fff',
-                      padding: '12px 24px',
+                      padding: '10px 20px',
                       borderRadius: 8,
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: 600,
                       letterSpacing: '0.04em',
                       textTransform: 'uppercase',
@@ -337,12 +337,12 @@ export default function HomePage() {
                     }}
                   >
                     View Details
-                    <ArrowRight size={16} />
+                    <ArrowRight size={14} />
                   </div>
                 </div>
               );
               const imageContent = (
-                <div style={{ position: 'relative', minHeight: 380 }}>
+                <div className="new-market-img" style={{ position: 'relative', minHeight: 380 }}>
                   <img
                     src={biz.images?.[0] || defaultImg}
                     alt={biz.name}

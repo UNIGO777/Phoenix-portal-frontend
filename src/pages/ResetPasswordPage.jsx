@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Lock, CheckCircle } from 'lucide-react';
 import api from '../services/api';
 import NetworkGlobe from '../components/NetworkGlobe';
+import LogoImg from '../assets/Logo.png';
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -100,54 +101,7 @@ export default function ResetPasswordPage() {
 
       {/* Branding */}
       <div style={{ position: 'relative', zIndex: 3, textAlign: 'center', marginTop: 44 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
-          <div
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: 9,
-              background: 'linear-gradient(150deg,#ff7a45,#ff4d4d)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 0 22px rgba(255,90,60,.5)',
-            }}
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 2c1.5 3 .5 4.8-.8 6.2C9.4 10.3 8 12 8 14.5a4 4 0 0 0 8 .2c0-.9-.2-1.7-.6-2.5 1.8 1 2.6 2.8 2.6 4.8a6 6 0 1 1-9.7-4.7C10.4 9.2 12 6.5 12 2Z"
-                fill="#fff"
-              />
-            </svg>
-          </div>
-          <div style={{ textAlign: 'left' }}>
-            <div
-              style={{
-                fontFamily: "'Sora', sans-serif",
-                fontWeight: 700,
-                fontSize: 20,
-                letterSpacing: '.04em',
-                color: '#fff',
-                lineHeight: 1,
-              }}
-            >
-              PHOENIX
-            </div>
-            <div
-              style={{
-                fontFamily: "'Sora', sans-serif",
-                fontWeight: 500,
-                fontSize: 12,
-                letterSpacing: '.42em',
-                color: '#ff8a5c',
-                lineHeight: 1,
-                marginTop: 4,
-              }}
-            >
-              BUSINESS EXCHANGE
-            </div>
-          </div>
-        </div>
+        <img src={LogoImg} alt="Phoenix Business Advisory" style={{ height: 44, objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
       </div>
 
       {/* Glass Panel */}
@@ -390,15 +344,8 @@ export default function ResetPasswordPage() {
           gap: 8,
         }}
       >
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M12 2 4 5v6c0 5 3.4 8.6 8 11 4.6-2.4 8-6 8-11V5l-8-3Z"
-            stroke="#46577a"
-            strokeWidth="1.6"
-            strokeLinejoin="round"
-          />
-        </svg>
-        PHOENIX BUSINESS EXCHANGE · HIGHLY CONFIDENTIAL · ENCRYPTED CHANNEL
+        <img src={LogoImg} alt="Phoenix Business Advisory" style={{ height: 14, objectFit: 'contain', filter: 'brightness(0) invert(0.4)' }} />
+        · HIGHLY CONFIDENTIAL · ENCRYPTED CHANNEL
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Diamond } from 'lucide-react';
+import LogoImg from '../../assets/Logo.png';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { useSidebar } from '../pages/AdminLayout';
 
@@ -74,8 +74,7 @@ export default function AdminNav() {
           }}
           onClick={() => navigate('/admin/dashboard')}
         >
-          <Diamond size={16} fill="#1d1d1f" />
-          PHOENIX ADMIN
+          <img src={LogoImg} alt="Phoenix Business Advisory" style={{ height: 24, objectFit: 'contain' }} />
         </div>
       </div>
 

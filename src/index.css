@@ -172,13 +172,18 @@ input::placeholder {
     grid-template-columns: 1fr 1fr !important;
   }
 
-  /* HomePage: new market cards stack image below text */
+  /* HomePage: new market cards stack — always content on top, image below */
   .new-market-card {
     grid-template-columns: 1fr !important;
     min-height: auto !important;
   }
-  .new-market-card > div:last-child {
+  .new-market-card .new-market-img {
+    order: 1 !important;
     min-height: 260px !important;
+  }
+  .new-market-card .new-market-text {
+    order: 2 !important;
+    padding: 16px !important;
   }
 }
 
