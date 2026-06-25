@@ -360,12 +360,6 @@ export default function AdminLogin() {
                   </span>
                 </div>
 
-                {/* Demo credentials */}
-                <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid rgba(170,200,255,.14)', textAlign: 'center' }}>
-                  <span style={{ fontSize: 11, color: '#6b7fa0' }}>
-                    Demo: naman13399@gmail.com / Naman@13399
-                  </span>
-                </div>
               </>
             )}
 

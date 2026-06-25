@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ChevronLeft, Send } from 'lucide-react';
-import api from '../services/api';
+import { ChevronLeft } from 'lucide-react';
 import NetworkGlobe from '../components/NetworkGlobe';
 
 export default function LoginPage() {
@@ -14,11 +13,7 @@ export default function LoginPage() {
   const { login, verifyOtp } = useAuth();
   const navigate = useNavigate();
 
-  // Forgot password states
-  const [view, setView] = useState('login'); // 'login' | 'otp' | 'forgot' | 'forgot-sent'
-  const [forgotEmail, setForgotEmail] = useState('');
-  const [forgotLoading, setForgotLoading] = useState(false);
-  const [forgotError, setForgotError] = useState('');
+  const [view, setView] = useState('login'); // 'login' | 'otp'
 
   // OTP states
   const [otpEmail, setOtpEmail] = useState('');
@@ -75,24 +70,6 @@ export default function LoginPage() {
       setOtpError(err.response?.data?.message || 'Failed to resend OTP');
     } finally {
       setOtpLoading(false);
-    }
-  };
-
-  const handleForgotSubmit = async (e) => {
-    e.preventDefault();
-    if (!forgotEmail.trim()) {
-      setForgotError('Please enter your email address.');
-      return;
-    }
-    setForgotLoading(true);
-    setForgotError('');
-    try {
-      await api.post('/auth/user/forgot-password', { email: forgotEmail.trim() });
-      setView('forgot-sent');
-    } catch (err) {
-      setForgotError(err.response?.data?.message || 'Something went wrong. Please try again.');
-    } finally {
-      setForgotLoading(false);
     }
   };
 
@@ -339,12 +316,6 @@ export default function LoginPage() {
                       />
                       Remember me
                     </label>
-                    <span
-                      onClick={() => { setView('forgot'); setForgotEmail(email); setForgotError(''); }}
-                      style={{ color: '#7fa6ff', textDecoration: 'none', cursor: 'pointer' }}
-                    >
-                      Reset access
-                    </span>
                   </div>
 
                   {/* Submit */}
@@ -474,152 +445,6 @@ export default function LoginPage() {
                   </span>
                 </div>
               </>
-            )}
-
-            {/* ── FORGOT PASSWORD VIEW ── */}
-            {view === 'forgot' && (
-              <>
-                <div
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, cursor: 'pointer', color: '#7fa6ff', fontSize: 13 }}
-                  onClick={() => { setView('login'); setForgotError(''); }}
-                >
-                  <ChevronLeft size={14} /> Back to login
-                </div>
-                <div
-                  style={{
-                    fontFamily: "'Sora', sans-serif",
-                    fontSize: 17,
-                    fontWeight: 600,
-                    color: '#eef3ff',
-                    letterSpacing: '.01em',
-                  }}
-                >
-                  Reset access
-                </div>
-                <div style={{ fontSize: 12, color: '#8ea2c8', marginBottom: 24, lineHeight: 1.5 }}>
-                  Enter your email address and we'll send you a link to reset your password.
-                </div>
-
-                {forgotError && (
-                  <div
-                    style={{
-                      background: 'rgba(255,60,60,.12)',
-                      border: '1px solid rgba(255,80,80,.3)',
-                      borderRadius: 10,
-                      padding: '10px 14px',
-                      marginBottom: 16,
-                      fontSize: 13,
-                      color: '#ff8a8a',
-                    }}
-                  >
-                    {forgotError}
-                  </div>
-                )}
-
-                <form onSubmit={handleForgotSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-                  <div style={{ position: 'relative' }}>
-                    <svg
-                      width="16" height="16" viewBox="0 0 24 24" fill="none"
-                      style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)' }}
-                    >
-                      <circle cx="12" cy="8" r="4" stroke="#7f93bd" strokeWidth="1.7" />
-                      <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="#7f93bd" strokeWidth="1.7" />
-                    </svg>
-                    <input
-                      type="email"
-                      placeholder="Email address"
-                      value={forgotEmail}
-                      onChange={(e) => setForgotEmail(e.target.value)}
-                      required
-                      style={inputStyle}
-                      onFocus={handleFocus}
-                      onBlur={handleBlur}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={forgotLoading}
-                    style={{
-                      width: '100%',
-                      padding: 14,
-                      border: 'none',
-                      borderRadius: 12,
-                      background: forgotLoading
-                        ? 'linear-gradient(135deg,#1d4abf,#3a6adf)'
-                        : 'linear-gradient(135deg,#2f6bff,#5b8cff 60%,#7fa6ff)',
-                      color: '#fff',
-                      fontFamily: "'Sora', sans-serif",
-                      fontSize: 14,
-                      fontWeight: 600,
-                      letterSpacing: '.04em',
-                      cursor: forgotLoading ? 'not-allowed' : 'pointer',
-                      boxShadow: '0 12px 32px rgba(50,110,255,.4), inset 0 1px 0 rgba(255,255,255,.3)',
-                      opacity: forgotLoading ? 0.7 : 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 8,
-                    }}
-                  >
-                    <Send size={14} />
-                    {forgotLoading ? 'SENDING...' : 'SEND RESET LINK'}
-                  </button>
-                </form>
-              </>
-            )}
-
-            {/* ── FORGOT SENT VIEW ── */}
-            {view === 'forgot-sent' && (
-              <div style={{ textAlign: 'center', padding: '10px 0' }}>
-                <div
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: '50%',
-                    background: 'rgba(70,226,154,0.15)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 18px',
-                  }}
-                >
-                  <Send size={20} color="#46e29a" />
-                </div>
-                <div
-                  style={{
-                    fontFamily: "'Sora', sans-serif",
-                    fontSize: 17,
-                    fontWeight: 600,
-                    color: '#eef3ff',
-                    marginBottom: 8,
-                  }}
-                >
-                  Check your email
-                </div>
-                <div style={{ fontSize: 13, color: '#8ea2c8', lineHeight: 1.5, marginBottom: 24 }}>
-                  If an account exists for <strong style={{ color: '#bcd0f2' }}>{forgotEmail}</strong>, we've sent a password reset link. The link expires in 1 hour.
-                </div>
-                <button
-                  onClick={() => { setView('login'); setForgotEmail(''); }}
-                  style={{
-                    width: '100%',
-                    padding: 14,
-                    border: 'none',
-                    borderRadius: 12,
-                    background: 'linear-gradient(135deg,#2f6bff,#5b8cff 60%,#7fa6ff)',
-                    color: '#fff',
-                    fontFamily: "'Sora', sans-serif",
-                    fontSize: 14,
-                    fontWeight: 600,
-                    letterSpacing: '.04em',
-                    cursor: 'pointer',
-                    boxShadow: '0 12px 32px rgba(50,110,255,.4), inset 0 1px 0 rgba(255,255,255,.3)',
-                  }}
-                >
-                  BACK TO LOGIN
-                </button>
-              </div>
             )}
 
             {/* Confidential badge — only on login view */}
