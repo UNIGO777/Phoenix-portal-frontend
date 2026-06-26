@@ -15,153 +15,157 @@ function formatPrice(n) {
 }
 
 function GallerySwiper({ images }) {
-  const galleryRef = useRef(null);
-  const [activeSlide, setActiveSlide] = useState(0);
-  const totalSlides = images.length;
+  const [active, setActive] = useState(0);
+  const [direction, setDirection] = useState(1); // 1 = next, -1 = prev
+  const timerRef = useRef(null);
+  const total = images.length;
 
-  const scrollToSlide = useCallback((index) => {
-    const el = galleryRef.current;
-    if (!el) return;
-    const slide = el.children[index];
-    if (slide) slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-  }, []);
+  const goTo = useCallback((i, dir) => {
+    const next = (i + total) % total;
+    setDirection(dir !== undefined ? dir : (next > active ? 1 : -1));
+    setActive(next);
+  }, [total, active]);
 
-  const handleScroll = useCallback(() => {
-    const el = galleryRef.current;
-    if (!el || !el.children[0]) return;
-    const slideWidth = el.children[0].offsetWidth;
-    const gap = 16;
-    setActiveSlide(Math.round(el.scrollLeft / (slideWidth + gap)));
-  }, []);
+  // Auto-play every 3 seconds, pause on hover
+  const startTimer = useCallback(() => {
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setDirection(1);
+      setActive((p) => (p + 1) % total);
+    }, 3000);
+  }, [total]);
+
+  useEffect(() => {
+    startTimer();
+    return () => clearInterval(timerRef.current);
+  }, [startTimer]);
+
+  const pauseTimer = () => clearInterval(timerRef.current);
+  const resumeTimer = () => startTimer();
 
   return (
-    <section style={{ padding: '48px 0 0' }}>
-      <h2
+    <section
+      style={{ padding: '0 clamp(16px, 5vw, 40px)' }}
+      onMouseEnter={pauseTimer}
+      onMouseLeave={resumeTimer}
+    >
+      {/* Image container */}
+      <div
         style={{
-          fontSize: 28,
-          fontWeight: 600,
-          letterSpacing: '-0.01em',
-          margin: '0 0 20px',
-          padding: '0 clamp(16px, 5vw, 40px)',
-          color: '#1d1d1f',
+          position: 'relative',
+          width: '100%',
+          maxWidth: 1100,
+          margin: '0 auto',
+          borderRadius: 28,
+          overflow: 'hidden',
+          aspectRatio: '21/9',
+          background: '#f5f5f7',
         }}
       >
-        Gallery
-      </h2>
+        {images.map((img, i) => {
+          let translateX = '0%';
+          if (i === active) translateX = '0%';
+          else if (i !== active) translateX = direction > 0 ? '100%' : '-100%';
 
-      <div style={{ position: 'relative' }}>
-        <div
-          ref={galleryRef}
-          onScroll={handleScroll}
+          return (
+            <img
+              key={i}
+              src={img}
+              alt={`Slide ${i + 1}`}
+              loading={i === 0 ? 'eager' : 'lazy'}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                transform: `translateX(${translateX})`,
+                transition: 'transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                zIndex: i === active ? 1 : 0,
+              }}
+            />
+          );
+        })}
+      </div>
+
+      {/* Controls: ‹  • • •  › */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 16,
+          marginTop: 24,
+        }}
+      >
+        {/* Prev arrow */}
+        <button
+          onClick={() => { goTo(active - 1, -1); startTimer(); }}
           style={{
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            border: 'none',
+            background: '#e8e8ed',
+            cursor: 'pointer',
             display: 'flex',
-            gap: 16,
-            overflowX: 'auto',
-            scrollSnapType: 'x mandatory',
-            scrollBehavior: 'smooth',
-            padding: '0 clamp(16px, 5vw, 40px)',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#1d1d1f',
+            transition: 'background 0.2s',
           }}
         >
-          {images.map((img, i) => (
-            <div
+          <ChevronLeft size={18} />
+        </button>
+
+        {/* Dots in pill */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            background: '#e8e8ed',
+            borderRadius: 20,
+            padding: '10px 16px',
+          }}
+        >
+          {images.map((_, i) => (
+            <button
               key={i}
+              onClick={() => { goTo(i, i > active ? 1 : -1); startTimer(); }}
               style={{
-                flex: '0 0 85%',
-                scrollSnapAlign: 'start',
-                borderRadius: 20,
-                overflow: 'hidden',
+                width: active === i ? 10 : 8,
+                height: active === i ? 10 : 8,
+                borderRadius: '50%',
+                border: 'none',
+                background: active === i ? '#1d1d1f' : '#b0b0b5',
+                cursor: 'pointer',
+                padding: 0,
+                transition: 'all 0.3s ease',
               }}
-            >
-              <img
-                src={img}
-                alt={`Gallery ${i + 1}`}
-                loading="lazy"
-                style={{
-                  width: '100%',
-                  height: 'clamp(280px, 45vw, 520px)',
-                  objectFit: 'cover',
-                  display: 'block',
-                }}
-              />
-            </div>
+            />
           ))}
         </div>
 
-        {activeSlide > 0 && (
-          <button
-            onClick={() => scrollToSlide(activeSlide - 1)}
-            style={{
-              position: 'absolute',
-              left: 'clamp(24px, 5vw, 48px)',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: 44,
-              height: 44,
-              borderRadius: '50%',
-              border: 'none',
-              background: 'rgba(255,255,255,0.85)',
-              backdropFilter: 'blur(10px)',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#1d1d1f',
-              zIndex: 2,
-            }}
-          >
-            <ChevronLeft size={20} />
-          </button>
-        )}
-
-        {activeSlide < totalSlides - 1 && (
-          <button
-            onClick={() => scrollToSlide(activeSlide + 1)}
-            style={{
-              position: 'absolute',
-              right: 'clamp(24px, 5vw, 48px)',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: 44,
-              height: 44,
-              borderRadius: '50%',
-              border: 'none',
-              background: 'rgba(255,255,255,0.85)',
-              backdropFilter: 'blur(10px)',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#1d1d1f',
-              zIndex: 2,
-            }}
-          >
-            <ChevronRight size={20} />
-          </button>
-        )}
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20 }}>
-        {images.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => scrollToSlide(i)}
-            style={{
-              width: activeSlide === i ? 24 : 8,
-              height: 8,
-              borderRadius: 4,
-              border: 'none',
-              background: activeSlide === i ? '#1d1d1f' : '#d1d1d6',
-              cursor: 'pointer',
-              padding: 0,
-              transition: 'all 0.3s ease',
-            }}
-          />
-        ))}
+        {/* Next arrow */}
+        <button
+          onClick={() => { goTo(active + 1, 1); startTimer(); }}
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            border: 'none',
+            background: '#e8e8ed',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#1d1d1f',
+            transition: 'background 0.2s',
+          }}
+        >
+          <ChevronRight size={18} />
+        </button>
       </div>
     </section>
   );
@@ -626,42 +630,48 @@ export default function ListingPage() {
             Request information
           </button>
         </div>
+      </section>
 
-        {/* Hero Image */}
-        <div
-          style={{
-            position: 'relative',
-            width: '100%',
-            maxWidth: 1100,
-            margin: '0 auto',
-            aspectRatio: '21/9',
-            borderRadius: 28,
-            overflow: 'hidden',
-          }}
-        >
-          <img
-            src={heroImg}
-            alt={business.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
+      {/* Hero Image Swiper */}
+      {business.images && business.images.length > 1 ? (
+        <GallerySwiper images={business.images} />
+      ) : (
+        <section style={{ padding: '0 clamp(16px, 5vw, 40px)' }}>
           <div
             style={{
-              position: 'absolute',
-              bottom: 20,
-              left: 20,
-              background: 'rgba(0,0,0,0.5)',
-              backdropFilter: 'blur(8px)',
-              borderRadius: 12,
-              padding: '10px 18px',
-              color: '#fff',
-              fontSize: 15,
-              fontWeight: 600,
+              position: 'relative',
+              width: '100%',
+              maxWidth: 1100,
+              margin: '0 auto',
+              aspectRatio: '21/9',
+              borderRadius: 28,
+              overflow: 'hidden',
             }}
           >
-            {formatPrice(business.askingPrice)}
+            <img
+              src={heroImg}
+              alt={business.name}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 20,
+                left: 20,
+                background: 'rgba(0,0,0,0.5)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: 12,
+                padding: '10px 18px',
+                color: '#fff',
+                fontSize: 15,
+                fontWeight: 600,
+              }}
+            >
+              {formatPrice(business.askingPrice)}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Stats Band */}
       <section style={{ padding: '40px clamp(16px, 5vw, 40px) 0' }}>
@@ -718,11 +728,6 @@ export default function ListingPage() {
             {business.description}
           </p>
         </section>
-      )}
-
-      {/* Gallery – Apple-style swiper */}
-      {business.images && business.images.length > 1 && (
-        <GallerySwiper images={business.images} />
       )}
 
       {/* CTA Band */}
