@@ -1,21 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Lock, FolderLock, Headset, Landmark, ChevronRight, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Lock, FolderLock, Headset, Landmark, ChevronRight, ArrowRight, CircleCheck } from 'lucide-react';
 import api from '../services/api';
 import Layout from '../components/layout/Layout';
 import Loader from '../components/Loader';
-
-const industryImages = {
-  SaaS: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&q=80',
-  'E-commerce': 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=200&q=80',
-  Retail: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=200&q=80',
-  Healthcare: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=200&q=80',
-  Manufacturing: 'https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=200&q=80',
-  Logistics: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=200&q=80',
-  'Real Estate': 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=200&q=80',
-  Hospitality: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200&q=80',
-};
 
 const defaultImg = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80';
 
@@ -53,14 +42,12 @@ const scaleIn = {
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [industries, setIndustries] = useState([]);
   const [featured, setFeatured] = useState([]);
   const [recommended, setRecommended] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
-      api.get('/industries').then((r) => setIndustries(r.data.data || [])).catch(() => {}),
       api.get('/featured').then((r) => setFeatured(r.data.data || [])).catch(() => {}),
       api.get('/businesses?limit=12').then((r) => setRecommended(r.data.data || [])).catch(() => {}),
     ]).finally(() => setLoading(false));
@@ -163,73 +150,6 @@ export default function HomePage() {
         </div>
       </motion.header>
 
-      {/* Industry Row */}
-      {industries.length > 0 && (
-        <motion.section
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={stagger}
-          style={{ padding: '0 clamp(16px, 5vw, 40px) 8px' }}
-        >
-          <div
-            className="mq-row user-industry-row"
-            style={{
-              display: 'flex',
-              gap: 5,
-              overflowX: 'auto',
-              padding: '8px 2px 22px',
-              scrollSnapType: 'x proximity',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-            }}
-            onWheel={(e) => {
-              if (e.deltaY === 0) return;
-              e.currentTarget.scrollLeft += e.deltaY < 0 ? -50 : 50;
-            }}
-          >
-            {industries.map((ind, i) => (
-              <motion.div
-                key={ind._id}
-                className="user-industry-item"
-                variants={scaleIn}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
-              >
-                <Link
-                  to={`/search?industry=${ind._id}`}
-                  className="user-industry-link"
-                  style={{
-                    flex: '0 0 auto',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 11,
-                    width: 120,
-                    scrollSnapAlign: 'start',
-                    textDecoration: 'none',
-                    color: '#1d1d1f',
-                  }}
-                >
-                  <img
-                    src={ind.image || industryImages[ind.name] || defaultImg}
-                    alt={ind.name}
-                    loading="lazy"
-                    className="user-industry-img"
-                    style={{
-                      width: 'clamp(64px, 12vw, 96px)',
-                      height: 'clamp(64px, 12vw, 96px)',
-                      borderRadius: 20,
-                      objectFit: 'cover',
-                      display: 'block',
-                    }}
-                  />
-                  <span className="user-industry-name" style={{ fontSize: 13, textAlign: 'center', lineHeight: 1.2, fontWeight: 500 }}>{ind.name}</span>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </motion.section>
-      )}
 
       {/* New on the Market */}
       {featured.length > 0 && (
@@ -317,6 +237,17 @@ export default function HomePage() {
                       </li>
                     )}
                   </ul>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <CircleCheck size={18} color="#22c55e" />
+                      <span style={{ fontSize: 14, fontWeight: 600, color: '#1d1d1f' }}>Permanent Visa</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                      <CircleCheck size={18} color="#22c55e" />
+                      <span style={{ fontSize: 14, fontWeight: 600, color: '#1d1d1f' }}>Green Card</span>
+                    </div>
+                  </div>
 
                   <div style={{ width: '100%', height: 1, background: '#ddd', margin: '12px 0 10px' }} />
 
@@ -484,6 +415,16 @@ export default function HomePage() {
                     {l.numEmployees ? `${l.numEmployees} employees` : ''}{' '}
                     {l.yearEstablished ? `\u00B7 Est. ${l.yearEstablished}` : ''}
                   </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 10 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <CircleCheck size={16} color="#22c55e" />
+                      <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Permanent Visa</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
+                      <CircleCheck size={16} color="#22c55e" />
+                      <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Green Card</span>
+                    </div>
+                  </div>
                 </div>
               </motion.article>
             ))}
@@ -583,15 +524,27 @@ export default function HomePage() {
                   <p style={{ fontSize: 13, color: '#6e6e73', lineHeight: 1.4, margin: '0 0 12px', flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {l.description || 'Business opportunity'}
                   </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <CircleCheck size={16} color="#22c55e" />
+                      <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>Permanent Visa</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
+                      <CircleCheck size={16} color="#22c55e" />
+                      <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>Green Card</span>
+                    </div>
+                  </div>
                   <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 'auto', paddingTop: 12, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
                     <div>
                       <div style={{ fontSize: 11, color: '#86868b' }}>Asking</div>
                       <div style={{ fontSize: 16, fontWeight: 600, color: '#1d1d1f' }}>{formatPrice(l.askingPrice)}</div>
                     </div>
-                    <div>
-                      <div style={{ fontSize: 11, color: '#86868b' }}>Est.</div>
-                      <div style={{ fontSize: 16, fontWeight: 600, color: '#1d1d1f' }}>{l.yearEstablished || 'N/A'}</div>
-                    </div>
+                    {l.yearEstablished && (
+                      <div>
+                        <div style={{ fontSize: 11, color: '#86868b' }}>Est.</div>
+                        <div style={{ fontSize: 16, fontWeight: 600, color: '#1d1d1f' }}>{l.yearEstablished}</div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </motion.article>

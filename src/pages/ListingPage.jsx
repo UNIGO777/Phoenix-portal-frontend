@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Search, X, ChevronLeft, Send } from 'lucide-react';
+import { Search, X, ChevronLeft, ChevronRight, Send } from 'lucide-react';
 import api from '../services/api';
 import Layout from '../components/layout/Layout';
 import Loader from '../components/Loader';
@@ -12,6 +12,159 @@ function formatPrice(n) {
   if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
   if (n >= 1e3) return `$${(n / 1e3).toFixed(0)}K`;
   return `$${n.toLocaleString()}`;
+}
+
+function GallerySwiper({ images }) {
+  const galleryRef = useRef(null);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const totalSlides = images.length;
+
+  const scrollToSlide = useCallback((index) => {
+    const el = galleryRef.current;
+    if (!el) return;
+    const slide = el.children[index];
+    if (slide) slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    const el = galleryRef.current;
+    if (!el || !el.children[0]) return;
+    const slideWidth = el.children[0].offsetWidth;
+    const gap = 16;
+    setActiveSlide(Math.round(el.scrollLeft / (slideWidth + gap)));
+  }, []);
+
+  return (
+    <section style={{ padding: '48px 0 0' }}>
+      <h2
+        style={{
+          fontSize: 28,
+          fontWeight: 600,
+          letterSpacing: '-0.01em',
+          margin: '0 0 20px',
+          padding: '0 clamp(16px, 5vw, 40px)',
+          color: '#1d1d1f',
+        }}
+      >
+        Gallery
+      </h2>
+
+      <div style={{ position: 'relative' }}>
+        <div
+          ref={galleryRef}
+          onScroll={handleScroll}
+          style={{
+            display: 'flex',
+            gap: 16,
+            overflowX: 'auto',
+            scrollSnapType: 'x mandatory',
+            scrollBehavior: 'smooth',
+            padding: '0 clamp(16px, 5vw, 40px)',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
+          {images.map((img, i) => (
+            <div
+              key={i}
+              style={{
+                flex: '0 0 85%',
+                scrollSnapAlign: 'start',
+                borderRadius: 20,
+                overflow: 'hidden',
+              }}
+            >
+              <img
+                src={img}
+                alt={`Gallery ${i + 1}`}
+                loading="lazy"
+                style={{
+                  width: '100%',
+                  height: 'clamp(280px, 45vw, 520px)',
+                  objectFit: 'cover',
+                  display: 'block',
+                }}
+              />
+            </div>
+          ))}
+        </div>
+
+        {activeSlide > 0 && (
+          <button
+            onClick={() => scrollToSlide(activeSlide - 1)}
+            style={{
+              position: 'absolute',
+              left: 'clamp(24px, 5vw, 48px)',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: 44,
+              height: 44,
+              borderRadius: '50%',
+              border: 'none',
+              background: 'rgba(255,255,255,0.85)',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#1d1d1f',
+              zIndex: 2,
+            }}
+          >
+            <ChevronLeft size={20} />
+          </button>
+        )}
+
+        {activeSlide < totalSlides - 1 && (
+          <button
+            onClick={() => scrollToSlide(activeSlide + 1)}
+            style={{
+              position: 'absolute',
+              right: 'clamp(24px, 5vw, 48px)',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: 44,
+              height: 44,
+              borderRadius: '50%',
+              border: 'none',
+              background: 'rgba(255,255,255,0.85)',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#1d1d1f',
+              zIndex: 2,
+            }}
+          >
+            <ChevronRight size={20} />
+          </button>
+        )}
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20 }}>
+        {images.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => scrollToSlide(i)}
+            style={{
+              width: activeSlide === i ? 24 : 8,
+              height: 8,
+              borderRadius: 4,
+              border: 'none',
+              background: activeSlide === i ? '#1d1d1f' : '#d1d1d6',
+              cursor: 'pointer',
+              padding: 0,
+              transition: 'all 0.3s ease',
+            }}
+          />
+        ))}
+      </div>
+    </section>
+  );
 }
 
 function InquiryModal({ business, onClose }) {
@@ -567,53 +720,9 @@ export default function ListingPage() {
         </section>
       )}
 
-      {/* Gallery */}
+      {/* Gallery – Apple-style swiper */}
       {business.images && business.images.length > 1 && (
-        <section style={{ padding: '48px clamp(16px, 5vw, 40px) 0' }}>
-          <h2
-            style={{
-              fontSize: 28,
-              fontWeight: 600,
-              letterSpacing: '-0.01em',
-              margin: '0 0 20px',
-              color: '#1d1d1f',
-            }}
-          >
-            Gallery
-          </h2>
-          <div className="user-gallery-grid" style={{ display: 'flex', gap: 12 }}>
-            <div style={{ flex: 1.6 }}>
-              <img
-                src={business.images[0]}
-                alt=""
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: 20,
-                  objectFit: 'cover',
-                  display: 'block',
-                  minHeight: 300,
-                }}
-              />
-            </div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {business.images.slice(1, 3).map((img, i) => (
-                <img
-                  key={i}
-                  src={img}
-                  alt=""
-                  style={{
-                    width: '100%',
-                    flex: 1,
-                    borderRadius: 20,
-                    objectFit: 'cover',
-                    display: 'block',
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
+        <GallerySwiper images={business.images} />
       )}
 
       {/* CTA Band */}

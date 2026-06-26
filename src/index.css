@@ -147,10 +147,6 @@ input::placeholder {
     flex-direction: column !important;
   }
 
-  /* ListingPage: gallery stacks */
-  .user-gallery-grid {
-    flex-direction: column !important;
-  }
 
   /* HomePage: featured grid stacks to 1 column */
   .user-featured-grid {
@@ -510,10 +506,6 @@ input::placeholder {
     font-size: 22px !important;
   }
 
-  /* ListingPage: gallery main image reduce min-height */
-  .user-gallery-grid img {
-    min-height: 180px !important;
-  }
 
   /* ListingPage: hero description smaller */
   .user-listing-hero-desc {
