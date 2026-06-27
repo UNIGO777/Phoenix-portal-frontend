@@ -6,7 +6,6 @@ import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import ListingPage from './pages/ListingPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
 import AdminApp from './admin/AdminApp';
 
 function ScrollToTop() {
@@ -24,7 +23,6 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route
             path="/home"
             element={
