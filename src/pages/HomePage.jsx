@@ -43,14 +43,10 @@ const scaleIn = {
 export default function HomePage() {
   const navigate = useNavigate();
   const [featured, setFeatured] = useState([]);
-  const [recommended, setRecommended] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      api.get('/featured').then((r) => setFeatured(r.data.data || [])).catch(() => {}),
-      api.get('/businesses?limit=12').then((r) => setRecommended(r.data.data || [])).catch(() => {}),
-    ]).finally(() => setLoading(false));
+    api.get('/featured').then((r) => setFeatured(r.data.data || [])).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -63,32 +59,6 @@ export default function HomePage() {
 
   return (
     <Layout>
-      {/* Promo Strip */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.05)' }}
-      >
-        <div
-          style={{
-            padding: '13px clamp(16px, 5vw, 40px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            textAlign: 'center',
-          }}
-        >
-          <span style={{ fontSize: 12, color: '#6e6e73' }}>
-            Verified financials and escrow protection on every listing.{' '}
-            <Link to="/search" style={{ color: '#0066cc', textDecoration: 'none' }}>
-              See how it works <ChevronRight size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />
-            </Link>
-          </span>
-        </div>
-      </motion.div>
-
       {/* Hero Header */}
       <motion.header
         initial="hidden"
@@ -140,25 +110,20 @@ export default function HomePage() {
               <br />
               the businesses you want.
             </p>
-            <Link
-              to="/search"
-              style={{ display: 'block', fontSize: 14, color: '#0066cc', textDecoration: 'none', marginTop: 6 }}
-            >
-              Browse listings <ChevronRight size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />
-            </Link>
+            
           </motion.div>
         </div>
       </motion.header>
 
 
-      {/* New on the Market */}
+      {/* Featured Products */}
       {featured.length > 0 && (
         <motion.section
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.15 }}
           variants={stagger}
-          style={{ padding: '32px clamp(16px, 5vw, 40px) 8px' }}
+          style={{ padding: '52px clamp(16px, 5vw, 40px) 8px' }}
         >
           <motion.h2
             variants={fadeUp}
@@ -171,11 +136,11 @@ export default function HomePage() {
               color: '#1d1d1f',
             }}
           >
-            New on the market.{' '}
-            <span style={{ color: '#86868b', fontWeight: 600 }}>Verified opportunities, just listed.</span>
+            Featured products.{' '}
+            <span style={{ color: '#86868b', fontWeight: 600 }}>Top opportunities, hand-picked for you.</span>
           </motion.h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 54 }}>
-            {featured.slice(0, 3).map((biz, i) => {
+            {featured.map((biz, i) => {
               const imageLeft = i % 2 === 1;
               const textContent = (
                 <div className="new-market-text" style={{ padding: 'clamp(18px, 3vw, 32px)', display: 'flex', flexDirection: 'column' }}>
@@ -310,245 +275,6 @@ export default function HomePage() {
                 </motion.article>
               );
             })}
-          </div>
-        </motion.section>
-      )}
-
-      {/* Featured Listings Carousel - Hand-picked by advisors */}
-      {featured.length > 0 && (
-        <motion.section
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.15 }}
-          variants={stagger}
-          style={{ padding: '52px 0 8px' }}
-        >
-          <div style={{ padding: '0 clamp(16px, 5vw, 40px)' }}>
-            <motion.h2
-              variants={fadeUp}
-              transition={{ duration: 0.6 }}
-              style={{
-                fontSize: 'clamp(22px, 2.6vw, 28px)',
-                fontWeight: 600,
-                letterSpacing: '-0.01em',
-                margin: '0 0 24px',
-                color: '#1d1d1f',
-              }}
-            >
-              Featured listings.{' '}
-              <span style={{ color: '#86868b', fontWeight: 600 }}>Hand-picked by our advisors.</span>
-            </motion.h2>
-          </div>
-          <div
-            className="mq-row user-featured-row"
-            style={{
-              display: 'flex',
-              gap: 20,
-              overflowX: 'auto',
-              padding: '10px 0 26px',
-              margin: '0 clamp(16px, 5vw, 40px)',
-              scrollSnapType: 'x proximity',
-            }}
-          >
-            {featured.map((l, i) => (
-              <motion.article
-                key={l._id}
-                variants={scaleIn}
-                transition={{ duration: 0.45, delay: i * 0.07 }}
-                whileHover={{ y: -6, boxShadow: '0 12px 40px rgba(0,0,0,0.25)', transition: { duration: 0.25 } }}
-                onClick={() => navigate(`/listing/${l._id}`)}
-                style={{
-                  flex: '0 0 300px',
-                  scrollSnapAlign: 'start',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  borderRadius: 18,
-                  background: '#10141d',
-                  color: '#fff',
-                  minHeight: 380,
-                  cursor: 'pointer',
-                  transition: 'box-shadow 0.3s ease',
-                }}
-              >
-                <img
-                  src={l.images?.[0] || defaultImg}
-                  alt=""
-                  loading="lazy"
-                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background:
-                      'linear-gradient(180deg,rgba(16,20,29,0.15) 0%,rgba(16,20,29,0.55) 55%,rgba(16,20,29,0.94) 100%)',
-                  }}
-                />
-                <div
-                  style={{
-                    position: 'relative',
-                    zIndex: 2,
-                    padding: 26,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    minHeight: 380,
-                  }}
-                >
-                  <div style={{ fontSize: 12, color: '#cdd4e0', marginBottom: 'auto' }}>
-                    {l.industry?.name || 'Business'} &middot; {l.country?.name || ''}
-                  </div>
-                  <h3
-                    style={{
-                      fontSize: 22,
-                      fontWeight: 600,
-                      letterSpacing: '-0.01em',
-                      lineHeight: 1.15,
-                      margin: '0 0 10px',
-                    }}
-                  >
-                    {l.name}
-                  </h3>
-                  <div style={{ fontSize: 15, color: '#fff' }}>
-                    Asking <strong>{formatPrice(l.askingPrice)}</strong>
-                  </div>
-                  <div style={{ fontSize: 13, color: '#c2c9d6', marginTop: 2 }}>
-                    {l.numEmployees ? `${l.numEmployees} employees` : ''}{' '}
-                    {l.yearEstablished ? `\u00B7 Est. ${l.yearEstablished}` : ''}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 10 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                      <CircleCheck size={16} color="#22c55e" />
-                      <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Permanent Visa</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
-                      <CircleCheck size={16} color="#22c55e" />
-                      <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Green Card</span>
-                    </div>
-                  </div>
-                </div>
-              </motion.article>
-            ))}
-          </div>
-        </motion.section>
-      )}
-
-      {/* You May Have Your Interest */}
-      {recommended.length > 0 && (
-        <motion.section
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.15 }}
-          variants={stagger}
-          style={{ padding: '52px 0 8px' }}
-        >
-          <div style={{ padding: '0 clamp(16px, 5vw, 40px)' }}>
-            <motion.h2
-              variants={fadeUp}
-              transition={{ duration: 0.6 }}
-              style={{
-                fontSize: 'clamp(22px, 2.6vw, 28px)',
-                fontWeight: 600,
-                letterSpacing: '-0.01em',
-                margin: '0 0 24px',
-                color: '#1d1d1f',
-              }}
-            >
-              You may have your interest.{' '}
-              <span style={{ color: '#86868b', fontWeight: 600 }}>More opportunities worth exploring.</span>
-            </motion.h2>
-          </div>
-          <div
-            className="mq-row user-featured-row"
-            style={{
-              display: 'flex',
-              gap: 20,
-              overflowX: 'auto',
-              padding: '10px 0 26px',
-              margin: '0 clamp(16px, 5vw, 40px)',
-              scrollSnapType: 'x proximity',
-            }}
-          >
-            {recommended.map((l, i) => (
-              <motion.article
-                key={l._id}
-                variants={scaleIn}
-                transition={{ duration: 0.45, delay: i * 0.06 }}
-                whileHover={{ y: -6, boxShadow: '0 12px 40px rgba(0,0,0,0.12)', transition: { duration: 0.25 } }}
-                onClick={() => navigate(`/listing/${l._id}`)}
-                style={{
-                  flex: '0 0 280px',
-                  scrollSnapAlign: 'start',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  borderRadius: 18,
-                  background: '#f5f5f7',
-                  color: '#1d1d1f',
-                  minHeight: 360,
-                  cursor: 'pointer',
-                  border: '1px solid rgba(0,0,0,0.08)',
-                  transition: 'box-shadow 0.3s ease',
-                }}
-              >
-                <img
-                  src={l.images?.[0] || defaultImg}
-                  alt=""
-                  loading="lazy"
-                  style={{ position: 'absolute', inset: 0, width: '100%', height: 180, objectFit: 'cover' }}
-                />
-                <div
-                  style={{
-                    position: 'relative',
-                    zIndex: 2,
-                    padding: 20,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    minHeight: 360,
-                    paddingTop: 190,
-                  }}
-                >
-                  <div style={{ fontSize: 11, fontWeight: 600, color: '#86868b', textTransform: 'uppercase', marginBottom: 8 }}>
-                    {l.industry?.name || 'Business'} &middot; {l.city || 'N/A'}
-                  </div>
-                  <h3
-                    style={{
-                      fontSize: 18,
-                      fontWeight: 600,
-                      letterSpacing: '-0.01em',
-                      lineHeight: 1.2,
-                      margin: '0 0 8px',
-                      color: '#1d1d1f',
-                    }}
-                  >
-                    {l.name}
-                  </h3>
-                  <p style={{ fontSize: 13, color: '#6e6e73', lineHeight: 1.4, margin: '0 0 12px', flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {l.description || 'Business opportunity'}
-                  </p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                      <CircleCheck size={16} color="#22c55e" />
-                      <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>Permanent Visa</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
-                      <CircleCheck size={16} color="#22c55e" />
-                      <span style={{ fontSize: 13, fontWeight: 600, color: '#1d1d1f' }}>Green Card</span>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 'auto', paddingTop: 12, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-                    <div>
-                      <div style={{ fontSize: 11, color: '#86868b' }}>Asking</div>
-                      <div style={{ fontSize: 16, fontWeight: 600, color: '#1d1d1f' }}>{formatPrice(l.askingPrice)}</div>
-                    </div>
-                    {l.yearEstablished && (
-                      <div>
-                        <div style={{ fontSize: 11, color: '#86868b' }}>Est.</div>
-                        <div style={{ fontSize: 16, fontWeight: 600, color: '#1d1d1f' }}>{l.yearEstablished}</div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </motion.article>
-            ))}
           </div>
         </motion.section>
       )}
