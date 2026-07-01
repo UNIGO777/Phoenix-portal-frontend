@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Lock, FolderLock, Headset, Landmark, ChevronRight, ArrowRight, CircleCheck } from 'lucide-react';
+import { ShieldCheck, Lock, FolderLock, Headset, Landmark, ArrowRight, CircleCheck } from 'lucide-react';
 import api from '../services/api';
 import Layout from '../components/layout/Layout';
 import Loader from '../components/Loader';
@@ -183,6 +183,9 @@ export default function HomePage() {
                         {biz.description.length > 120 ? biz.description.slice(0, 120) + '...' : biz.description}
                       </li>
                     )}
+                    <li style={{ fontSize: 14, lineHeight: 1.4, color: '#333' }}>
+                      <strong>{formatPrice(biz.askingPrice)}</strong> + Asking Price
+                    </li>
                     {biz.yearEstablished && (
                       <li style={{ fontSize: 14, lineHeight: 1.4, color: '#333' }}>
                         <strong>{new Date().getFullYear() - biz.yearEstablished} Years</strong> + in Operation (Est. {biz.yearEstablished})
@@ -193,9 +196,7 @@ export default function HomePage() {
                         <strong>{biz.numEmployees} Employees</strong> + in Company
                       </li>
                     )}
-                    <li style={{ fontSize: 14, lineHeight: 1.4, color: '#333' }}>
-                      <strong>{formatPrice(biz.askingPrice)}</strong> + Asking Price
-                    </li>
+                    
                     {biz.grossRevenue && (
                       <li style={{ fontSize: 14, lineHeight: 1.4, color: '#333' }}>
                         <strong>{formatPrice(biz.grossRevenue)}</strong> + Gross Revenue
@@ -206,7 +207,11 @@ export default function HomePage() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <CircleCheck size={18} color="#22c55e" />
-                      <span style={{ fontSize: 14, fontWeight: 600, color: '#1d1d1f' }}>Permanent Visa</span>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: '#1d1d1f' }}>Permanent Residency</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <CircleCheck size={18} color="#22c55e" />
+                      <span style={{ fontSize: 14, fontWeight: 600, color: '#1d1d1f' }}>Visa</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                       <CircleCheck size={18} color="#22c55e" />
