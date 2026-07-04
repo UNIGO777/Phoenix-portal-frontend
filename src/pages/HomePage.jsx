@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Lock, FolderLock, Headset, Landmark, ArrowRight, CircleCheck } from 'lucide-react';
+import { ShieldCheck, Lock, FolderLock, Headset, Landmark, ArrowRight, CircleCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../services/api';
 import Layout from '../components/layout/Layout';
 import Loader from '../components/Loader';
@@ -21,6 +21,164 @@ function formatPrice(n) {
   if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
   if (n >= 1e3) return `$${(n / 1e3).toFixed(0)}K`;
   return `$${n.toLocaleString()}`;
+}
+
+/* Card image carousel — swipe through all business images inside the card */
+function CardImageCarousel({ images, alt }) {
+  const [active, setActive] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const timerRef = useRef(null);
+  const total = images.length;
+
+  const goTo = useCallback((i, dir) => {
+    const next = (i + total) % total;
+    setDirection(dir);
+    setActive(next);
+  }, [total]);
+
+  const startTimer = useCallback(() => {
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setDirection(1);
+      setActive((p) => (p + 1) % total);
+    }, 3500);
+  }, [total]);
+
+  useEffect(() => {
+    startTimer();
+    return () => clearInterval(timerRef.current);
+  }, [startTimer]);
+
+  const stop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  return (
+    <div
+      className="new-market-img"
+      style={{ position: 'relative', minHeight: 380, overflow: 'hidden' }}
+      onMouseEnter={() => clearInterval(timerRef.current)}
+      onMouseLeave={startTimer}
+    >
+      {images.map((img, i) => {
+        let translateX = '0%';
+        if (i !== active) translateX = direction > 0 ? '100%' : '-100%';
+        return (
+          <img
+            key={i}
+            src={img}
+            alt={alt}
+            loading={i === 0 ? 'eager' : 'lazy'}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              transform: `translateX(${translateX})`,
+              transition: 'transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)',
+              zIndex: i === active ? 1 : 0,
+            }}
+          />
+        );
+      })}
+
+      {total > 1 && (
+        <>
+          {/* Prev arrow */}
+          <button
+            onClick={(e) => { stop(e); goTo(active - 1, -1); startTimer(); }}
+            aria-label="Previous image"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: 12,
+              transform: 'translateY(-50%)',
+              zIndex: 2,
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              border: 'none',
+              background: 'rgba(255,255,255,0.85)',
+              backdropFilter: 'blur(4px)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#1d1d1f',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            }}
+          >
+            <ChevronLeft size={18} />
+          </button>
+
+          {/* Next arrow */}
+          <button
+            onClick={(e) => { stop(e); goTo(active + 1, 1); startTimer(); }}
+            aria-label="Next image"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              right: 12,
+              transform: 'translateY(-50%)',
+              zIndex: 2,
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              border: 'none',
+              background: 'rgba(255,255,255,0.85)',
+              backdropFilter: 'blur(4px)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#1d1d1f',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            }}
+          >
+            <ChevronRight size={18} />
+          </button>
+
+          {/* Dots */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 16,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 2,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 7,
+              background: 'rgba(0,0,0,0.35)',
+              backdropFilter: 'blur(6px)',
+              borderRadius: 20,
+              padding: '7px 12px',
+            }}
+          >
+            {images.map((_, i) => (
+              <button
+                key={i}
+                onClick={(e) => { stop(e); goTo(i, i > active ? 1 : -1); startTimer(); }}
+                aria-label={`Go to image ${i + 1}`}
+                style={{
+                  width: active === i ? 9 : 7,
+                  height: active === i ? 9 : 7,
+                  borderRadius: '50%',
+                  border: 'none',
+                  padding: 0,
+                  background: active === i ? '#fff' : 'rgba(255,255,255,0.5)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                }}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
 /* reusable fade-up variant */
@@ -242,20 +400,9 @@ export default function HomePage() {
                   </div>
                 </div>
               );
+              const bizImages = biz.images && biz.images.length > 0 ? biz.images : [defaultImg];
               const imageContent = (
-                <div className="new-market-img" style={{ position: 'relative', minHeight: 380 }}>
-                  <img
-                    src={biz.images?.[0] || defaultImg}
-                    alt={biz.name}
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    }}
-                  />
-                </div>
+                <CardImageCarousel images={bizImages} alt={biz.name} />
               );
               return (
                 <motion.article

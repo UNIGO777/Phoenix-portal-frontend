@@ -6,12 +6,7 @@ import LogoImg from '../../assets/Logo.png';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 
-const navItems = [
-  { name: 'Marketplace', to: '/home' },
-  { name: 'Industries', to: '/search' },
-  { name: 'Countries', to: '/search' },
-  { name: 'How It Works', to: '#' },
-];
+const navItems = [];
 
 const staticMenus = {
   Marketplace: [
@@ -204,13 +199,7 @@ export default function Navbar() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 18, fontSize: 20 }}>
-            <Link
-              to="/search"
-              onMouseEnter={() => setOpenMenu(null)}
-              style={{ opacity: 0.82, color: '#1d1d1f', textDecoration: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-            >
-              <Search size={18} />
-            </Link>
+            
 
             {/* Desktop user icon */}
             <div className="user-nav-user" style={{ position: 'relative' }}>
