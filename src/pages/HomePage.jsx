@@ -204,7 +204,34 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/featured').then((r) => setFeatured(r.data.data || [])).catch(() => {}).finally(() => setLoading(false));
+    let mounted = true;
+
+    const loadBusinesses = async () => {
+      try {
+        const featuredResponse = await api.get('/featured');
+        const featuredListings = featuredResponse.data.data || [];
+
+        if (featuredListings.length > 0) {
+          if (mounted) setFeatured(featuredListings);
+          return;
+        }
+
+        const fallbackResponse = await api.get('/businesses', {
+          params: { page: 1, limit: 6, sort: '-createdAt' },
+        });
+        if (mounted) setFeatured(fallbackResponse.data.data || []);
+      } catch {
+        if (mounted) setFeatured([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    loadBusinesses();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   if (loading) {
@@ -275,11 +302,10 @@ export default function HomePage() {
 
 
       {/* Featured Products */}
-      {featured.length > 0 && (
-        <motion.section
+      <motion.section
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.15 }}
+          viewport={{ once: true, amount: 0.01 }}
           variants={stagger}
           style={{ padding: '52px clamp(16px, 5vw, 40px) 8px' }}
         >
@@ -297,8 +323,9 @@ export default function HomePage() {
             Featured products.{' '}
             <span style={{ color: '#86868b', fontWeight: 600 }}>Top opportunities, hand-picked for you.</span>
           </motion.h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 54 }}>
-            {featured.map((biz, i) => {
+          {featured.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 54 }}>
+              {featured.map((biz, i) => {
               const imageLeft = i % 2 === 1;
               const textContent = (
                 <div className="new-market-text" style={{ padding: 'clamp(18px, 3vw, 32px)', display: 'flex', flexDirection: 'column' }}>
@@ -426,16 +453,53 @@ export default function HomePage() {
                   {imageLeft ? textContent : imageContent}
                 </motion.article>
               );
-            })}
-          </div>
+              })}
+            </div>
+          ) : (
+            <motion.div
+              variants={fadeUp}
+              transition={{ duration: 0.5 }}
+              style={{
+                background: '#fff',
+                borderRadius: 18,
+                padding: '28px clamp(18px, 4vw, 32px)',
+                color: '#6e6e73',
+              }}
+            >
+              <h3 style={{ fontSize: 20, color: '#1d1d1f', margin: '0 0 8px', fontWeight: 600 }}>
+                Listings are being updated.
+              </h3>
+              <p style={{ fontSize: 15, lineHeight: 1.45, margin: '0 0 18px' }}>
+                Browse all available business opportunities while featured listings are refreshed.
+              </p>
+              <Link
+                to="/search"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  background: '#1d1d1f',
+                  color: '#fff',
+                  padding: '11px 18px',
+                  borderRadius: 8,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Browse Listings
+                <ArrowRight size={14} />
+              </Link>
+            </motion.div>
+          )}
         </motion.section>
-      )}
 
       {/* The Difference */}
       <motion.section
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
+        viewport={{ once: true, amount: 0.01 }}
         variants={stagger}
         style={{ padding: '52px clamp(16px, 5vw, 40px) 8px' }}
       >
@@ -488,7 +552,7 @@ export default function HomePage() {
       <motion.section
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
+        viewport={{ once: true, amount: 0.01 }}
         variants={stagger}
         style={{ padding: '52px clamp(16px, 5vw, 40px) 8px' }}
       >
@@ -572,7 +636,7 @@ export default function HomePage() {
       <motion.section
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.3 }}
+        viewport={{ once: true, amount: 0.01 }}
         style={{ padding: '44px clamp(16px, 5vw, 40px) 8px' }}
       >
         <motion.div
