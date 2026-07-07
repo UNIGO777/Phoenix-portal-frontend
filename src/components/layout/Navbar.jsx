@@ -300,80 +300,11 @@ export default function Navbar() {
             }}
           >
             <div style={{ padding: '16px 20px' }}>
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.to === '#' ? '/search' : item.to}
-                  onClick={() => setMobileOpen(false)}
-                  style={{
-                    display: 'block',
-                    padding: '14px 0',
-                    fontSize: 16,
-                    fontWeight: 500,
-                    color: '#1d1d1f',
-                    textDecoration: 'none',
-                    borderBottom: '1px solid rgba(0,0,0,0.06)',
-                  }}
-                >
-                  {item.name}
-                </Link>
-              ))}
+              
 
-              {/* Industries in mobile */}
-              {industries.length > 0 && (
-                <div style={{ paddingTop: 12 }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
-                    Industries
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-                    {industries.slice(0, 12).map((ind) => (
-                      <Link
-                        key={ind._id}
-                        to={`/search?industry=${ind._id}`}
-                        onClick={() => setMobileOpen(false)}
-                        style={{
-                          fontSize: 13,
-                          color: '#0066cc',
-                          textDecoration: 'none',
-                          padding: '6px 14px',
-                          background: 'rgba(0,102,204,0.06)',
-                          borderRadius: 980,
-                        }}
-                      >
-                        {ind.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
+      
 
-              {/* Countries in mobile */}
-              {countries.length > 0 && (
-                <div style={{ paddingTop: 4 }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
-                    Countries
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-                    {countries.slice(0, 12).map((c) => (
-                      <Link
-                        key={c._id}
-                        to={`/search?country=${c._id}`}
-                        onClick={() => setMobileOpen(false)}
-                        style={{
-                          fontSize: 13,
-                          color: '#1d1d1f',
-                          textDecoration: 'none',
-                          padding: '6px 14px',
-                          background: 'rgba(0,0,0,0.04)',
-                          borderRadius: 980,
-                        }}
-                      >
-                        {c.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
+             
 
               {/* User info + logout */}
               {user && (
