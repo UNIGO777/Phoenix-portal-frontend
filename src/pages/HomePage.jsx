@@ -246,6 +246,7 @@ export default function HomePage() {
     <Layout>
       {/* Hero Header */}
       <motion.header
+        className="home-hero-header"
         initial="hidden"
         animate="visible"
         variants={stagger}
@@ -303,6 +304,7 @@ export default function HomePage() {
 
       {/* Featured Products */}
       <motion.section
+          className="home-featured-section"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.01 }}
@@ -310,6 +312,7 @@ export default function HomePage() {
           style={{ padding: '52px clamp(16px, 5vw, 40px) 8px' }}
         >
           <motion.h2
+            className="home-featured-title"
             variants={fadeUp}
             transition={{ duration: 0.6 }}
             style={{

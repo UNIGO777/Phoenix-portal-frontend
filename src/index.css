@@ -310,6 +310,19 @@ input::placeholder {
     max-width: 100% !important;
   }
 
+  .home-hero-header {
+    padding-top: 56px !important;
+    padding-bottom: 24px !important;
+  }
+
+  .home-featured-section {
+    padding-top: 28px !important;
+  }
+
+  .home-featured-title {
+    margin-bottom: 16px !important;
+  }
+
   /* HomePage: featured side cards stack to 1 col */
   .user-featured-grid > div {
     grid-template-columns: 1fr !important;
